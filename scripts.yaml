@@ -1,0 +1,5 @@
+scripts:
+
+  make: elm make src/Main.elm
+
+  look: open -a /Applications/Firefox.app/ index.html
