@@ -1,0 +1,32 @@
+title: Integration
+---
+id: 1.1.1
+---
+next: 1.1.2
+---
+@target
+$$
+\int x^n dx
+$$
++++
+Use '\\int' for the integral sign
+---
+comment: This is for starters
+---
+===
+title: Integration
+---
+id: 1.1.2
+---
+next: 1.1.3
+---
+@target
+$$
+\\int_0^1 x^n dx
+$$
++++
+You know all you need to know for this one!
+---
+comment: You are getting better!
+---
+===

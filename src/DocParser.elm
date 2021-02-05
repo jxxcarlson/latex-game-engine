@@ -70,11 +70,16 @@ comment: You are getting better!
 ===
 """
 
+problems input =
+   case run problemListParser input of
+       Ok ps -> ps
+       Err _ -> []
+
 -- > run problemListParser probs
 -- Ok [{ comment = " This is for starters", id = Just [1,1,1], next = Just [1,1,2], target = ["$$\n\\int x^n dx\n$$","Use '\\int' for the integral sign"], title = " Integration" },{ comment = " You are getting better!", id = Just [1,1,2], next = Just [1,1,3], target = ["$$\n\\int_0^1 x^n dx\n$$","You know all you need to know for this one!"], title = " Integration" }]
 --     : Result (List DeadEnd) (List Problem)
 problemListParser : Parser (List Problem)
-problemListParser = 
+problemListParser =
   PT.sepBy spaces problemParser
 
 problemParser : Parser Problem
