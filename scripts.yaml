@@ -4,5 +4,4 @@ scripts:
 
   look: open -a /Applications/Firefox.app/ public/index.html
 
-
-  # live: elm-live src/Main.elm
+  live: elm-live src/Main.elm --open --start-page=public/index.html -- --output=public/Main.js

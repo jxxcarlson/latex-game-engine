@@ -37,6 +37,7 @@ type alias Model =
     , fileContents : Maybe String
     , problems : List Problem
     , currentProblem : Maybe Problem
+    , answer : String
     }
 
 
@@ -48,6 +49,7 @@ type Msg
     | ProblemsSelected File
     | ProblemsLoaded String
     | LaTeXMsg MiniLatex.EditSimple.LaTeXMsg
+    | GetAnswer String
 
 
 type alias Flags =
@@ -61,6 +63,7 @@ init flags =
       , fileContents = Nothing
       , problems = []
       , currentProblem = Nothing
+      , answer = ""
       }
     , Cmd.none
     )
@@ -105,6 +108,9 @@ update msg model =
           , Cmd.none
           )
 
+        GetAnswer a ->
+           ({model | answer = a}, Cmd.none)
+
 fileStatus : Maybe String -> String
 fileStatus mstr =
     case mstr of
@@ -135,11 +141,24 @@ mainView model =
         [ column [  spacing 20 ]
             [ title "The LaTeX Game"
             , viewProblem model.currentProblem
+            , viewEditor model
             , inputText model
             , appButton
             , outputDisplay model
             ]
         ]
+
+viewEditor : Model -> Element Msg
+viewEditor model =
+    Input.multiline [width (px 560), height (px 200)]
+      { onChange = GetAnswer
+      , text = model.answer
+      , placeholder = Nothing
+      , spellcheck = False
+      , label = Input.labelHidden "LaTeX input field"
+
+
+      }
 
 viewProblem : Maybe Problem -> Element Msg
 viewProblem mproblem =
@@ -148,29 +167,20 @@ viewProblem mproblem =
         Just problem -> renderMath problem
 
 
+renderMath : Problem -> Element Msg
+renderMath problem =
+    case List.head problem.target of
+        Nothing -> Element.none
+        Just sourceText ->
+           column [height (px 180), width (px 560), paddingXY 18 0,  Font.size 16, Background.color (rgb 255 255 255)]
+             (List.map Element.html (renderMath_ sourceText))
+
 renderMath_ : String -> List (Html Msg)
 renderMath_ str =
    str
      |> MiniLatex.EditSimple.render
      |> List.map (Html.map LaTeXMsg)
 
-renderMath problem =
-    case List.head problem.target of
-        Nothing -> Element.none
-        Just sourceText ->
-           column [height (px 220), width (px 560), padding 24,  Background.color (rgb 255 255 255)]
-             (List.map Element.html (renderMath_ sourceText))
-
-
-mathText : String -> Html msg
-mathText content =
-    Html.node "math-text"
-        [ HA.class "mm-math", HA.property "content" (Json.Encode.string content) ]
-        []
-
--- renderLaTeX : String -> Element Msg
-renderLaTeX str =
-   row [ ](MiniLatex.EditSimple.render str |> List.map (Element.html))
 
 title : String -> Element msg
 title str =
