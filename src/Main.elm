@@ -16,7 +16,7 @@ import Element.Font as Font
 import Element.Input as Input
 import File exposing (File)
 import File.Select as Select
-import Problem
+import Problem exposing(Id)
 import Task
 import DocParser exposing(Problem)
 import MiniLatex.EditSimple
@@ -59,7 +59,7 @@ type Msg
     | LaTeXMsg MiniLatex.EditSimple.LaTeXMsg
     | NewSeed Int
     | GetSolution String
-    | NextProblem
+    | FindProblem Id
     | OK
     | ToggleInfo
 
@@ -125,7 +125,7 @@ update msg model =
               problems =  DocParser.problems (Utility.removeComments content)
           in
           ( { model | fileContents = Just content
-               , problems = problems
+               , problems = problems |> Debug.log "PROBLEMS"
                , currentProblem = List.head problems
                , output =  fileStatus (Just content)
                , solution =  "nothing yet"
@@ -140,14 +140,15 @@ update msg model =
         GetSolution s ->
            ({model | solution = s, counter = Debug.log "N" (model.counter + 1)}, Random.generate NewSeed (Random.int 1 10000))
 
-        NextProblem ->
+        FindProblem id ->
             let
-              p = Problem.findById (Maybe.andThen .next model.currentProblem) model.problems |> Debug.log "CP"
+              p = Problem.findById id model.problems |> Debug.log "CP"
             in
             ({model | currentProblem = p
                    , solution = ""
                    , showInfo = False
                    , counter = model.counter + 1}, Cmd.none)
+
 
         OK -> (model, Cmd.none)
 
@@ -198,7 +199,11 @@ lhs model =
             , viewSolution model.counter model.solution
             , heading Config.answerTitle
             , viewEditor model
-            , row [spacing 12, paddingXY 0 12] [loadButton, okButton, nextButton]
+            , row [spacing 12, paddingXY 0 12] [
+                 loadButton
+               , okButton
+               , nextButton model.currentProblem
+               , prevButton model.currentProblem]
             , el [Font.size 12, Font.italic, alignBottom ](outputDisplay model)
             ]
         ]
@@ -244,10 +249,13 @@ showComment : Int -> Maybe Problem -> Element Msg
 showComment seed mprob =
     case mprob of
         Nothing -> Element.none
-        Just prob -> column[width (px 300) ] [
-               el [Font.size 14, Font.bold, moveRight 8] (text "Comment")
-             , column [Font.size 13, width (px 280), padding 10] [renderMath seed hintStyle prob.comment]
-             ]
+        Just prob ->
+            if String.length prob.comment < 3  then Element.none
+            else
+                column[width (px 300) ] [
+                       el [Font.size 14, Font.bold, moveRight 8] (text "Comment")
+                     , column [Font.size 13, width (px 280), padding 10] [renderMath seed hintStyle prob.comment]
+                     ]
 
 hintStyle = [  HA.style "background-color" "white"
              , HA.style "width" "280px"
@@ -370,16 +378,35 @@ okButton =
             }
         ]
 
-nextButton : Element Msg
-nextButton =
+nextButton : Maybe Problem -> Element Msg
+nextButton mprob =
+    case mprob of
+        Nothing -> Element.none
+        Just prob -> findProblemButton prob.next "Next"
+
+prevButton : Maybe Problem -> Element Msg
+prevButton mprob =
+    case mprob of
+        Nothing -> Element.none
+        Just prob -> findProblemButton prob.prev "Prev"
+
+findProblemButton : Id -> String -> Element Msg
+findProblemButton id label =
     row [ ]
         [ Input.button buttonStyle
-            { onPress = Just NextProblem
-            , label = el labelStyle (text "Next")
+            { onPress = Just (FindProblem id)
+            , label = el labelStyle (text label)
             }
         ]
 
-
+--prevButton : Element Msg
+--prevButton =
+--    row [ ]
+--        [ Input.button buttonStyle
+--            { onPress = Just PreviousProblem
+--            , label = el labelStyle (text "Previous")
+--            }
+--        ]
 
 --
 -- STYLE

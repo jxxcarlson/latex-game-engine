@@ -15,9 +15,11 @@ answerTitle = "Your code:"
 
 initialProblemText = """title: Example
 ---
+prev: 1
+---
 id: 1
 ---
-next: 1.1
+next: 1
 ---
 target:
 Pythagorean theorem: $a^2 + b^2 = c^2$

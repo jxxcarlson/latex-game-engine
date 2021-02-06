@@ -1,4 +1,4 @@
-module Problem exposing (findById)
+module Problem exposing (findById, Id)
 
 import DocParser exposing(Problem)
 

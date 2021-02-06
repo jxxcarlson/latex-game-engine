@@ -1,4 +1,6 @@
-title: Integration
+title: Integration A
+---
+prev: 1.1.2
 ---
 id: 1.1.1
 ---
@@ -10,16 +12,15 @@ $$
 $$
 ---
 hint:
-Use '\int' for the integral sign.
 Use \code{\int} for the integral sign.
-You will get this: $\int$.
-Use '\int' for the integral sign.
 ---
 comment: This is for starters
 ---
 
 # This problem needs more thought
-title: Integration
+title: Integration B
+---
+prev: 1.1.1
 ---
 id: 1.1.2
 ---
@@ -33,6 +34,6 @@ $$
 hint:
 You know all you need to know for this one!
 ---
-comment: You are getting better!
+comment:
 ---
 

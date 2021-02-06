@@ -5,6 +5,7 @@ import ParserTools as PT
 
 type alias Problem = {
       title : String
+    , prev : Maybe (List Int)
     , id : Maybe (List Int)
     , next : Maybe (List Int)
     , target : String
@@ -90,6 +91,7 @@ problemParser : Parser Problem
 problemParser = 
   succeed Problem
     |= kvSParser_ "title"
+    |= (kvSParser_ "prev" |> map parseId)
     |= (kvSParser_ "id" |> map parseId)
     |= (kvSParser_ "next" |> map parseId)
     |= kvSParser_ "target"
