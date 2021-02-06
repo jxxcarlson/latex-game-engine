@@ -1,4 +1,4 @@
-module Problem exposing (findById, Id, Op(..))
+module Problem exposing (findById, Id, Op(..), toZipper, firstChild, forward, backward)
 
 import DocParser exposing(Problem)
 import HTree
@@ -33,11 +33,23 @@ toZipper problems =
       |> List.filter (\p -> p.id /= Nothing)
       |> HTree.fromList rootProblem level
       |> Zipper.fromTree
-      |> firstChild_
+      |> firstChild
 
 
-firstChild_ : Zipper a -> Zipper a
-firstChild_ z =
+firstChild : Zipper a -> Zipper a
+firstChild z =
     case Zipper.firstChild z of
+        Nothing -> z
+        Just z_ -> z_
+
+forward : Zipper a -> Zipper a
+forward z =
+    case Zipper.forward z of
+        Nothing -> z
+        Just z_ -> z_
+
+backward : Zipper a -> Zipper a
+backward z =
+    case Zipper.backward z of
         Nothing -> z
         Just z_ -> z_

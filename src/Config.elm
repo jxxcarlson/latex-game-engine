@@ -13,7 +13,22 @@ solutionTitle = "Your code, rendered:"
 
 answerTitle = "Your code:"
 
-initialProblemText = """title: Example
+initialDocumentText = """title: Welcome
+---
+author: James Carlson
+---
+date: 2 Feb 2021
+---
+description:
+We assume that you have learned about
+subscripts and superscripts.  In this
+lesson you will learn how to write common
+expressions in Calculus: derivatives,
+integrals, etc.
+---
+
+
+title: Example
 ---
 id: 1
 ---

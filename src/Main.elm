@@ -23,6 +23,7 @@ import MiniLatex.EditSimple
 import Config
 import Random
 import Utility
+import Tree.Zipper as Zipper exposing(Zipper)
 
 
 main =
@@ -39,7 +40,7 @@ type alias Model =
     , output : String
     , fileContents : Maybe String
     , documentDescription : Maybe DocumentDescription
-    , problems : List Problem
+    , problems : Zipper Problem
     , currentProblem : Maybe Problem
     , solution: String
     , seed : Int
@@ -60,7 +61,8 @@ type Msg
     | LaTeXMsg MiniLatex.EditSimple.LaTeXMsg
     | NewSeed Int
     | GetSolution String
-    | FindProblem Id Op
+    | NextProblem
+    | PrevProblem
     | OK
     | ToggleInfo
 
@@ -72,20 +74,30 @@ type alias Flags =
     }
 
 
+load : String -> (Maybe DocumentDescription, Zipper Problem)
+load input =
+    let
+          (documentDescription, problems_) =
+             case DocParser.parseDocument input of
+                Nothing -> (Nothing, [])
+                Just (desc, probs) -> (Just desc, probs)
+
+          zipper = Problem.toZipper problems_
+    in
+      (documentDescription, zipper)
+
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
-        initialProblemList : List Problem
-        initialProblemList = DocParser.problems Config.initialProblemText
-        initialSolution = Config.initialSolutionText
+      (documentDescription, zipper) = load Config.initialDocumentText
     in
     ( { input = "App started"
       , output = "App started"
       , fileContents = Nothing
-      , documentDescription = Nothing
-      , problems = initialProblemList
-      , currentProblem = List.head initialProblemList
-      , solution = initialSolution
+      , documentDescription = documentDescription
+      , problems = zipper
+      , currentProblem = Zipper.firstChild zipper |> Maybe.map Zipper.label
+      , solution = Config.initialSolutionText
       , seed = flags.seed
       , counter = 0
       , showInfo = False
@@ -123,19 +135,19 @@ update msg model =
           )
 
         ProblemsLoaded content ->
-            case DocParser.parseDocument (Utility.removeComments content) of
-                Nothing -> (model, Cmd.none)
-                Just (documentDescription, problems) ->
-                  ( { model | fileContents = Just content
-                       , documentDescription = Just documentDescription
-                       , problems = problems |> Debug.log "PROBLEMS"
-                       , currentProblem = List.head problems
-                       , output =  fileStatus (Just content)
-                       , solution =  "nothing yet"
-                       , counter = model.counter + 1
-                    }
-                  , Cmd.none
-                  )
+            case load (Utility.removeComments content) of
+                (Nothing, _) -> (model, Cmd.none)
+                (documentDescription, zipper) ->
+                      ( { model | fileContents = Just content
+                           , documentDescription = documentDescription
+                           , problems = zipper
+                           , currentProblem = Just <| Zipper.label zipper
+                           , output =  fileStatus (Just content)
+                           , solution =  "nothing yet"
+                           , counter = model.counter + 1
+                        }
+                      , Cmd.none
+                      )
 
         NewSeed newSeed ->
              ( { model | seed = newSeed }, Cmd.none )
@@ -143,16 +155,18 @@ update msg model =
         GetSolution s ->
            ({model | solution = s, counter = Debug.log "N" (model.counter + 1)}, Random.generate NewSeed (Random.int 1 10000))
 
-        FindProblem id op ->
-            (model, Cmd.none)
-            --let
-            --  p = Problem.findById id model.problems |> Debug.log "CP"
-            --in
-            --({model | currentProblem = p
-            --       , solution = ""
-            --       , showInfo = False
-            --       , counter = model.counter + 1}, Cmd.none)
 
+        NextProblem ->
+            let
+                zipper = Problem.forward model.problems
+            in
+            ({model | problems = zipper, currentProblem = Just <| Zipper.label zipper}, Cmd.none)
+
+        PrevProblem ->
+            let
+                zipper = Problem.backward model.problems
+            in
+            ({model | problems = zipper, currentProblem = Just <| Zipper.label zipper}, Cmd.none)
 
         OK -> (model, Cmd.none)
 
@@ -206,8 +220,8 @@ lhs model =
             , row [spacing 12, paddingXY 0 12] [
                  loadButton
                , okButton
-               , nextButton model.currentProblem
-               , prevButton model.currentProblem]
+               , nextButton
+               , prevButton ]
             , el [Font.size 12, Font.italic, alignBottom ](outputDisplay model)
             ]
         ]
@@ -336,7 +350,7 @@ heading1 str =
 outputDisplay : Model -> Element msg
 outputDisplay model =
     row [ spacing 12]
-        [ text model.output, text <| "Problems loaded: " ++ String.fromInt (List.length model.problems) ]
+        [ text model.output, text <| "Problems loaded"] -- ++ String.fromInt (List.length model.problems) ]
 
 
 inputText : Model -> Element Msg
@@ -382,35 +396,24 @@ okButton =
             }
         ]
 
-nextButton : Maybe Problem -> Element Msg
-nextButton mprob =
-    case mprob of
-        Nothing -> Element.none
-        Just prob -> findProblemButton prob.id Next"Next"
 
-prevButton : Maybe Problem -> Element Msg
-prevButton mprob =
-    case mprob of
-        Nothing -> Element.none
-        Just prob -> findProblemButton prob.id Prev "Prev"
-
-findProblemButton : Id -> Op -> String -> Element Msg
-findProblemButton id op label =
+prevButton : Element Msg
+prevButton =
     row [ ]
         [ Input.button buttonStyle
-            { onPress = Just (FindProblem id op)
-            , label = el labelStyle (text label)
+            { onPress = Just PrevProblem
+            , label = el labelStyle (text "Prev")
             }
         ]
 
---prevButton : Element Msg
---prevButton =
---    row [ ]
---        [ Input.button buttonStyle
---            { onPress = Just PreviousProblem
---            , label = el labelStyle (text "Previous")
---            }
---        ]
+nextButton : Element Msg
+nextButton =
+    row [ ]
+        [ Input.button buttonStyle
+            { onPress = Just NextProblem
+            , label = el labelStyle (text "Next")
+            }
+        ]
 
 --
 -- STYLE
