@@ -92,8 +92,8 @@ problemParser =
     |= kvSParser_ "title"
     |= (kvSParser_ "id" |> map parseId)
     |= (kvSParser_ "next" |> map parseId)
-    |= kvLParser_ "target"
-    |= kvLParser_ "hint"
+    |= kvSParser_ "target"
+    |= kvSParser_ "hint"
     |= kvSParser_ "comment"
     |. symbol "===\n"
     |. spaces
@@ -222,8 +222,8 @@ kvSParser_ : String -> Parser String
 kvSParser_ key = 
  succeed identity
    |. symbol (key ++ ":")
-   |= getChompedString (chompWhile (\c -> c /= '\n'))
-   |. symbol "\n---"
+   |= getChompedString (chompUntil "---")
+   |. symbol "---"
    |. spaces
 
 kvLParser : Parser KV

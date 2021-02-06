@@ -152,7 +152,7 @@ fileStatus : Maybe String -> String
 fileStatus mstr =
     case mstr of
         Nothing -> "No file contents loaded"
-        Just stuff -> String.fromInt (String.length stuff) ++ " chars added"
+        Just stuff -> String.fromInt (String.length stuff) ++ " bytes read"
 
 --
 -- VIEW
@@ -194,6 +194,7 @@ lhs model =
             , heading Config.answerTitle
             , viewEditor model
             , row [spacing 12, paddingXY 0 12] [loadButton, okButton, nextButton]
+            , el [Font.size 12, Font.italic, alignBottom ](outputDisplay model)
             ]
         ]
 
@@ -216,7 +217,7 @@ rhs model =
         [ column [  spacing 10 ]
             [
 
-             el [Font.size 12, Font.italic, alignBottom ](outputDisplay model)
+
             ]
         ]
 

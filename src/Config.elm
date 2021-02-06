@@ -7,9 +7,9 @@ appWidth = 900
 
 appTitle = "LaTeX Challenge"
 
-problemTitle = "Write LaTeX to imitate this"
+problemTitle = "Write LaTeX to imitate this:"
 
-solutionTitle = "Your code, rendered"
+solutionTitle = "Your code, rendered:"
 
 answerTitle = "Your code:"
 
