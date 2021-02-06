@@ -16,9 +16,9 @@ import Element.Font as Font
 import Element.Input as Input
 import File exposing (File)
 import File.Select as Select
-import Problem exposing(Id)
+import Problem exposing(Id, Op(..))
 import Task
-import DocParser exposing(Problem)
+import DocParser exposing(Problem, DocumentDescription)
 import MiniLatex.EditSimple
 import Config
 import Random
@@ -38,6 +38,7 @@ type alias Model =
     { input : String
     , output : String
     , fileContents : Maybe String
+    , documentDescription : Maybe DocumentDescription
     , problems : List Problem
     , currentProblem : Maybe Problem
     , solution: String
@@ -59,7 +60,7 @@ type Msg
     | LaTeXMsg MiniLatex.EditSimple.LaTeXMsg
     | NewSeed Int
     | GetSolution String
-    | FindProblem Id
+    | FindProblem Id Op
     | OK
     | ToggleInfo
 
@@ -81,6 +82,7 @@ init flags =
     ( { input = "App started"
       , output = "App started"
       , fileContents = Nothing
+      , documentDescription = Nothing
       , problems = initialProblemList
       , currentProblem = List.head initialProblemList
       , solution = initialSolution
@@ -121,18 +123,19 @@ update msg model =
           )
 
         ProblemsLoaded content ->
-          let
-              problems =  DocParser.problems (Utility.removeComments content)
-          in
-          ( { model | fileContents = Just content
-               , problems = problems |> Debug.log "PROBLEMS"
-               , currentProblem = List.head problems
-               , output =  fileStatus (Just content)
-               , solution =  "nothing yet"
-               , counter = model.counter + 1
-            }
-          , Cmd.none
-          )
+            case DocParser.parseDocument (Utility.removeComments content) of
+                Nothing -> (model, Cmd.none)
+                Just (documentDescription, problems) ->
+                  ( { model | fileContents = Just content
+                       , documentDescription = Just documentDescription
+                       , problems = problems |> Debug.log "PROBLEMS"
+                       , currentProblem = List.head problems
+                       , output =  fileStatus (Just content)
+                       , solution =  "nothing yet"
+                       , counter = model.counter + 1
+                    }
+                  , Cmd.none
+                  )
 
         NewSeed newSeed ->
              ( { model | seed = newSeed }, Cmd.none )
@@ -140,14 +143,15 @@ update msg model =
         GetSolution s ->
            ({model | solution = s, counter = Debug.log "N" (model.counter + 1)}, Random.generate NewSeed (Random.int 1 10000))
 
-        FindProblem id ->
-            let
-              p = Problem.findById id model.problems |> Debug.log "CP"
-            in
-            ({model | currentProblem = p
-                   , solution = ""
-                   , showInfo = False
-                   , counter = model.counter + 1}, Cmd.none)
+        FindProblem id op ->
+            (model, Cmd.none)
+            --let
+            --  p = Problem.findById id model.problems |> Debug.log "CP"
+            --in
+            --({model | currentProblem = p
+            --       , solution = ""
+            --       , showInfo = False
+            --       , counter = model.counter + 1}, Cmd.none)
 
 
         OK -> (model, Cmd.none)
@@ -382,19 +386,19 @@ nextButton : Maybe Problem -> Element Msg
 nextButton mprob =
     case mprob of
         Nothing -> Element.none
-        Just prob -> findProblemButton prob.next "Next"
+        Just prob -> findProblemButton prob.id Next"Next"
 
 prevButton : Maybe Problem -> Element Msg
 prevButton mprob =
     case mprob of
         Nothing -> Element.none
-        Just prob -> findProblemButton prob.prev "Prev"
+        Just prob -> findProblemButton prob.id Prev "Prev"
 
-findProblemButton : Id -> String -> Element Msg
-findProblemButton id label =
+findProblemButton : Id -> Op -> String -> Element Msg
+findProblemButton id op label =
     row [ ]
         [ Input.button buttonStyle
-            { onPress = Just (FindProblem id)
+            { onPress = Just (FindProblem id op)
             , label = el labelStyle (text label)
             }
         ]
