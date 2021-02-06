@@ -13,8 +13,10 @@
             "elm/json": "1.1.3",
             "elm/parser": "1.1.0",
             "elm/random": "1.0.0",
+            "jxxcarlson/htree": "2.0.1",
             "jxxcarlson/meenylatex": "14.0.0",
-            "mdgriffith/elm-ui": "1.1.8"
+            "mdgriffith/elm-ui": "1.1.8",
+            "zwilias/elm-rosetree": "1.5.0"
         },
         "indirect": {
             "Garados007/elm-svg-parser": "1.0.0",
