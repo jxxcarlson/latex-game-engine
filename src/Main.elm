@@ -9,6 +9,7 @@ module Main exposing (main)
 import Browser
 import Html exposing (Html)
 import Html.Attributes as HA
+import Html.Keyed as Keyed
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
@@ -17,9 +18,9 @@ import File exposing (File)
 import File.Select as Select
 import Task
 import DocParser exposing(Problem)
-import Json.Encode
 import MiniLatex.EditSimple
-import MiniLatex.Edit
+import Config
+import Random
 
 
 main =
@@ -37,8 +38,12 @@ type alias Model =
     , fileContents : Maybe String
     , problems : List Problem
     , currentProblem : Maybe Problem
-    , answer : String
+    , solution: String
+    , seed : Int
+    , counter : Int
     }
+
+
 
 
 type Msg
@@ -49,21 +54,32 @@ type Msg
     | ProblemsSelected File
     | ProblemsLoaded String
     | LaTeXMsg MiniLatex.EditSimple.LaTeXMsg
-    | GetAnswer String
+    | NewSeed Int
+    | GetSolution String
 
 
 type alias Flags =
-    {}
+    { seed : Int
+    , width : Int
+    , height : Int
+    }
 
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
+    let
+        initialProblemList : List Problem
+        initialProblemList = DocParser.problems Config.initialProblemText
+        initialSolution = Config.initialSolutionText
+    in
     ( { input = "App started"
       , output = "App started"
       , fileContents = Nothing
-      , problems = []
-      , currentProblem = Nothing
-      , answer = ""
+      , problems = initialProblemList
+      , currentProblem = List.head initialProblemList
+      , solution = initialSolution
+      , seed = flags.seed
+      , counter = 0
       }
     , Cmd.none
     )
@@ -99,17 +115,22 @@ update msg model =
 
         ProblemsLoaded content ->
           let
-              problems = Debug.log "PROBLEMS" <| DocParser.problems content
+              problems =  DocParser.problems content
           in
           ( { model | fileContents = Just content
                , problems = problems
                , currentProblem = List.head problems
-               , output =  fileStatus (Just content)}
+               , output =  fileStatus (Just content)
+               , solution =  "nothing yet"
+            }
           , Cmd.none
           )
 
-        GetAnswer a ->
-           ({model | answer = a}, Cmd.none)
+        NewSeed newSeed ->
+             ( { model | seed = newSeed }, Cmd.none )
+
+        GetSolution s ->
+           ({model | solution = s, counter = Debug.log "N" (model.counter + 1)}, Random.generate NewSeed (Random.int 1 10000))
 
 fileStatus : Maybe String -> String
 fileStatus mstr =
@@ -137,11 +158,31 @@ noFocus =
 
 mainView : Model -> Element Msg
 mainView model =
+  column [] [
+       row [width (px Config.appWidth), centerX, paddingXY 0 12] [ title Config.appTitle ]
+     , row [  spacing 20 ] [ lhs model, rhs model ]
+    ]
+
+
+lhs : Model -> Element Msg
+lhs model =
     column mainColumnStyle
-        [ column [  spacing 20 ]
-            [ title "The LaTeX Game"
-            , viewProblem model.currentProblem
+        [ column [  spacing 10 ]
+            [ heading Config.problemTitle
+            , viewProblem model.counter model.currentProblem
+            , heading Config.solutionTitle
+            , viewSolution model.counter model.solution
+            , heading Config.answerTitle
             , viewEditor model
+            ]
+        ]
+
+
+rhs : Model -> Element Msg
+rhs model =
+    column mainColumnStyle
+        [ column [  spacing 10 ]
+            [ title "Controls"
             , inputText model
             , appButton
             , outputDisplay model
@@ -150,9 +191,9 @@ mainView model =
 
 viewEditor : Model -> Element Msg
 viewEditor model =
-    Input.multiline [width (px 560), height (px 200)]
-      { onChange = GetAnswer
-      , text = model.answer
+    Input.multiline [width (px 560), height (px Config.paneHeight)]
+      { onChange = GetSolution
+      , text = model.solution
       , placeholder = Nothing
       , spellcheck = False
       , label = Input.labelHidden "LaTeX input field"
@@ -160,32 +201,53 @@ viewEditor model =
 
       }
 
-viewProblem : Maybe Problem -> Element Msg
-viewProblem mproblem =
+viewSolution : Int -> String -> Element Msg
+viewSolution  seed solution =
+  column [height (px Config.paneHeight), width (px 560), paddingXY 18 0,  Font.size 16, Background.color (rgb 255 255 255)]
+     [renderMath seed solution]
+
+viewProblem : Int -> Maybe Problem -> Element Msg
+viewProblem seed mproblem =
     case mproblem of
         Nothing -> el [] (text "No problem loaded")
-        Just problem -> renderMath problem
+        Just problem -> renderProblem seed problem
 
 
-renderMath : Problem -> Element Msg
-renderMath problem =
+
+-- RENDER
+
+renderProblem : Int -> Problem -> Element Msg
+renderProblem seed problem =
     case List.head problem.target of
         Nothing -> Element.none
         Just sourceText ->
-           column [height (px 180), width (px 560), paddingXY 18 0,  Font.size 16, Background.color (rgb 255 255 255)]
-             (List.map Element.html (renderMath_ sourceText))
+           column [height (px Config.paneHeight), width (px 560), paddingXY 18 0,  Font.size 16, Background.color (rgb 255 255 255)]
+             [renderMath seed sourceText]
 
-renderMath_ : String -> List (Html Msg)
-renderMath_ str =
+
+renderMath : Int -> String -> Element Msg
+renderMath seed str =
    str
-     |> MiniLatex.EditSimple.render
+     |> MiniLatex.EditSimple.renderWithVersion seed
      |> List.map (Html.map LaTeXMsg)
+     |> Html.div  []
+     |> mathNode seed
 
+mathNode : Int -> Html Msg -> Element Msg
+mathNode k element =
+    (Keyed.node "div" [] [(String.fromInt k, element)]) |> Element.html
+
+
+
+-- UI
 
 title : String -> Element msg
 title str =
-    row [  Font.size 36 ] [ text str ]
+    row [  width (px Config.appWidth), Font.size 36, Font.color (rgb255 240 240 240) ] [ text str ]
 
+heading : String -> Element msg
+heading str =
+    row [  Font.size 18, paddingEach {top = 12, bottom = 0, left = 0, right = 0} ] [ text str ]
 
 outputDisplay : Model -> Element msg
 outputDisplay model =
