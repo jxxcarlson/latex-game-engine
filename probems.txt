@@ -10,13 +10,15 @@ $$
 $$
 ---
 hint:
-Use '\\int' for the integral sign
+Use '\int' for the integral sign.
+Use \code{\int} for the integral sign.
+You will get this: $\int$.
+Use '\int' for the integral sign.
 ---
 comment: This is for starters
 ---
 
-
-===
+# This problem needs more thought
 title: Integration
 ---
 id: 1.1.2
@@ -33,4 +35,4 @@ You know all you need to know for this one!
 ---
 comment: You are getting better!
 ---
-===
+

@@ -43,6 +43,7 @@ type alias Model =
     , solution: String
     , seed : Int
     , counter : Int
+    , showInfo : Bool
     }
 
 
@@ -60,6 +61,7 @@ type Msg
     | GetSolution String
     | NextProblem
     | OK
+    | ToggleInfo
 
 
 type alias Flags =
@@ -84,6 +86,7 @@ init flags =
       , solution = initialSolution
       , seed = flags.seed
       , counter = 0
+      , showInfo = False
       }
     , Cmd.none
     )
@@ -119,7 +122,7 @@ update msg model =
 
         ProblemsLoaded content ->
           let
-              problems =  DocParser.problems content
+              problems =  DocParser.problems (Utility.removeComments content)
           in
           ( { model | fileContents = Just content
                , problems = problems
@@ -143,10 +146,12 @@ update msg model =
             in
             ({model | currentProblem = p
                    , solution = ""
+                   , showInfo = False
                    , counter = model.counter + 1}, Cmd.none)
 
-        OK ->
-                    (model, Cmd.none)
+        OK -> (model, Cmd.none)
+
+        ToggleInfo -> ({model | showInfo = not model.showInfo}, Cmd.none)
 
 fileStatus : Maybe String -> String
 fileStatus mstr =
@@ -215,11 +220,43 @@ rhs : Model -> Element Msg
 rhs model =
     column rhsColumnStyle
         [ column [  spacing 10 ]
-            [
-
+            [  el [moveRight 8] (toggleInfo model.showInfo)
+               , showIf model.showInfo <| showHint model.seed model.currentProblem
+               , showIf model.showInfo <| showComment model.seed model.currentProblem
 
             ]
         ]
+
+showIf : Bool -> Element Msg -> Element Msg
+showIf show element =
+    if show then  element else Element.none
+
+showHint : Int -> Maybe Problem -> Element Msg
+showHint seed mprob =
+    case mprob of
+        Nothing -> Element.none
+        Just prob -> column[width (px 300) ] [
+               el [Font.size 14, Font.bold, moveRight 8] (text "Hint")
+             , column [Font.size 13, width (px 280), padding 10] [renderMath seed hintStyle prob.hint]
+             ]
+
+showComment : Int -> Maybe Problem -> Element Msg
+showComment seed mprob =
+    case mprob of
+        Nothing -> Element.none
+        Just prob -> column[width (px 300) ] [
+               el [Font.size 14, Font.bold, moveRight 8] (text "Comment")
+             , column [Font.size 13, width (px 280), padding 10] [renderMath seed hintStyle prob.comment]
+             ]
+
+hintStyle = [  HA.style "background-color" "white"
+             , HA.style "width" "280px"
+             , HA.style "padding-top" "1px"
+             , HA.style "padding-bottom" "1px"
+             , HA.style "padding-left" "9px"
+             , HA.style "padding-right" "8px"
+             ]
+
 
 viewEditor : Model -> Element Msg
 viewEditor model =
@@ -233,8 +270,8 @@ viewEditor model =
 
 viewSolution : Int -> String -> Element Msg
 viewSolution  seed solution =
-  column [height (px Config.paneHeight), width (px 560), paddingXY 18 0,  Font.size 16, Background.color (rgb 255 255 255)]
-     [renderMath seed solution]
+  column  problemStyle
+     [renderMath seed [] solution]
 
 viewProblem : Int -> Maybe Problem -> Element Msg
 viewProblem seed mproblem =
@@ -248,16 +285,19 @@ viewProblem seed mproblem =
 
 renderProblem : Int -> Problem -> Element Msg
 renderProblem seed problem =
-   column [height (px Config.paneHeight), width (px 560), paddingXY 18 0,  Font.size 16, Background.color (rgb 255 255 255)]
-     [renderMath seed problem.target]
+   column problemStyle
+     [renderMath  seed  [] problem.target]
 
 
-renderMath : Int -> String -> Element Msg
-renderMath seed str =
+problemStyle : List (Attribute Msg)
+problemStyle = [height (px Config.paneHeight), width (px 560), paddingXY 18 0,  Font.size 16, Background.color (rgb 255 255 255)]
+
+renderMath : Int -> List (Html.Attribute Msg) -> String -> Element Msg
+renderMath seed attr str =
    str
      |> MiniLatex.EditSimple.renderWithVersion seed
      |> List.map (Html.map LaTeXMsg)
-     |> Html.div  []
+     |> Html.div  attr
      |> mathNode seed
 
 mathNode : Int -> Html Msg -> Element Msg
@@ -299,6 +339,17 @@ inputText model =
 
 -- BUTTONS
 
+toggleInfo : Bool -> Element Msg
+toggleInfo showInfo =
+    let
+        label = if showInfo then "Hide Info" else "Show Info"
+    in
+    row [ ]
+        [ Input.button buttonStyle
+            { onPress = Just ToggleInfo
+            , label = el labelStyle (text label)
+            }
+        ]
 
 labelStyle = [ centerX, centerY, Font.size 14]
 

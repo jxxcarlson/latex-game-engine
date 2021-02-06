@@ -95,8 +95,6 @@ problemParser =
     |= kvSParser_ "target"
     |= kvSParser_ "hint"
     |= kvSParser_ "comment"
-    |. symbol "===\n"
-    |. spaces
 
 parseId : String -> Maybe (List Int)
 parseId input = 
