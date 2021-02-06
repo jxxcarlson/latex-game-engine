@@ -16,11 +16,13 @@ import Element.Font as Font
 import Element.Input as Input
 import File exposing (File)
 import File.Select as Select
+import Problem
 import Task
 import DocParser exposing(Problem)
 import MiniLatex.EditSimple
 import Config
 import Random
+import Utility
 
 
 main =
@@ -56,6 +58,8 @@ type Msg
     | LaTeXMsg MiniLatex.EditSimple.LaTeXMsg
     | NewSeed Int
     | GetSolution String
+    | NextProblem
+    | OK
 
 
 type alias Flags =
@@ -122,6 +126,7 @@ update msg model =
                , currentProblem = List.head problems
                , output =  fileStatus (Just content)
                , solution =  "nothing yet"
+               , counter = model.counter + 1
             }
           , Cmd.none
           )
@@ -131,6 +136,17 @@ update msg model =
 
         GetSolution s ->
            ({model | solution = s, counter = Debug.log "N" (model.counter + 1)}, Random.generate NewSeed (Random.int 1 10000))
+
+        NextProblem ->
+            let
+              p = Problem.findById (Maybe.andThen .next model.currentProblem) model.problems |> Debug.log "CP"
+            in
+            ({model | currentProblem = p
+                   , solution = ""
+                   , counter = model.counter + 1}, Cmd.none)
+
+        OK ->
+                    (model, Cmd.none)
 
 fileStatus : Maybe String -> String
 fileStatus mstr =
@@ -142,11 +158,12 @@ fileStatus mstr =
 -- VIEW
 --
 
+gray g = rgb255 g g g
 
 view : Model -> Html Msg
 view model =
     Element.layoutWith { options = [focusStyle noFocus]}
-       [Background.color (rgb255 40 40 40)]
+       [Background.color (gray 60)]
        (mainView model)
 
 noFocus : Element.FocusStyle
@@ -158,7 +175,7 @@ noFocus =
 
 mainView : Model -> Element Msg
 mainView model =
-  column [] [
+  column [centerX] [
        row [width (px Config.appWidth), centerX, paddingXY 0 12] [ title Config.appTitle ]
      , row [  spacing 20 ] [ lhs model, rhs model ]
     ]
@@ -167,38 +184,50 @@ mainView model =
 lhs : Model -> Element Msg
 lhs model =
     column mainColumnStyle
-        [ column [  spacing 10 ]
-            [ heading Config.problemTitle
+        [ column [  spacing 6 ]
+            [
+              problemTitle model.currentProblem
+            , heading1 Config.problemTitle
             , viewProblem model.counter model.currentProblem
             , heading Config.solutionTitle
             , viewSolution model.counter model.solution
             , heading Config.answerTitle
             , viewEditor model
+            , row [spacing 12, paddingXY 0 12] [loadButton, okButton, nextButton]
             ]
         ]
 
+problemTitle : Maybe Problem -> Element Msg
+problemTitle mprob =
+    case mprob of
+        Nothing -> Element.none
+        Just prob ->
+            let
+                id = prob.id
+                  |> Maybe.withDefault []
+                  |> List.map String.fromInt
+                  |> String.join "."
+            in
+             el [Font.bold, Font.size 18] (text <| id ++ " " ++ prob.title)
 
 rhs : Model -> Element Msg
 rhs model =
-    column mainColumnStyle
+    column rhsColumnStyle
         [ column [  spacing 10 ]
-            [ title "Controls"
-            , inputText model
-            , appButton
-            , outputDisplay model
+            [
+
+             el [Font.size 12, Font.italic, alignBottom ](outputDisplay model)
             ]
         ]
 
 viewEditor : Model -> Element Msg
 viewEditor model =
-    Input.multiline [width (px 560), height (px Config.paneHeight)]
+    Input.multiline [width (px 560), height (px Config.paneHeight), Font.size 16]
       { onChange = GetSolution
       , text = model.solution
       , placeholder = Nothing
       , spellcheck = False
       , label = Input.labelHidden "LaTeX input field"
-
-
       }
 
 viewSolution : Int -> String -> Element Msg
@@ -243,11 +272,16 @@ mathNode k element =
 
 title : String -> Element msg
 title str =
-    row [  width (px Config.appWidth), Font.size 36, Font.color (rgb255 240 240 240) ] [ text str ]
+    row [  width (px Config.appWidth), Font.size 24, Font.color (gray 240), paddingXY 0 8 ] [ text str ]
 
 heading : String -> Element msg
 heading str =
-    row [  Font.size 18, paddingEach {top = 12, bottom = 0, left = 0, right = 0} ] [ text str ]
+    row [  Font.size 16, Font.italic, paddingEach {top = 12, bottom = 0, left = 0, right = 0} ] [ text str ]
+
+heading1 : String -> Element msg
+heading1 str =
+    row [  Font.size 16, Font.italic ] [ text str ]
+
 
 outputDisplay : Model -> Element msg
 outputDisplay model =
@@ -265,13 +299,34 @@ inputText model =
             , label = Input.labelLeft [] <| el [] (text "")
             })
 
+-- BUTTONS
 
-appButton : Element Msg
-appButton =
+
+labelStyle = [ centerX, centerY, Font.size 14]
+
+loadButton : Element Msg
+loadButton =
     row [ ]
         [ Input.button buttonStyle
             { onPress = Just ProblemsRequested
-            , label = el [ centerX, centerY ] (text "Load")
+            , label = el labelStyle (text "Load")
+            }
+        ]
+okButton : Element Msg
+okButton =
+    row [ ]
+        [ Input.button buttonStyle
+            { onPress = Just OK
+            , label = el labelStyle(text "OK")
+            }
+        ]
+
+nextButton : Element Msg
+nextButton =
+    row [ ]
+        [ Input.button buttonStyle
+            { onPress = Just NextProblem
+            , label = el labelStyle (text "Next")
             }
         ]
 
@@ -294,6 +349,14 @@ mainColumnStyle =
     , height fill
     ]
 
+rhsColumnStyle =
+    [ centerX
+    , centerY
+    , Background.color (gray 200)
+    , paddingXY 20 20
+    , width (px 400)
+    , height fill
+    ]
 
 buttonStyle =
     [ Background.color (rgb255 40 40 40)

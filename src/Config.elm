@@ -7,17 +7,17 @@ appWidth = 900
 
 appTitle = "LaTeX Challenge"
 
-problemTitle = "Challenge"
+problemTitle = "Write LaTeX to imitate this"
 
-solutionTitle = "Does this match?"
+solutionTitle = "Your code, rendered"
 
-answerTitle = "Type your answer:"
+answerTitle = "Your code:"
 
-initialProblemText = """title: Integration
+initialProblemText = """title: Example
 ---
-id: 1.1.1
+id: 1
 ---
-next: 1.1.2
+next: 1.1
 ---
 @target
 Pythagorean theorem: $a^2 + b^2 = c^2$
