@@ -4,11 +4,12 @@ id: 1.1.1
 ---
 next: 1.1.2
 ---
-@target
+target:
 $$
 \int x^n dx
 $$
-+++
+---
+hint:
 Use '\\int' for the integral sign
 ---
 comment: This is for starters
@@ -20,11 +21,12 @@ id: 1.1.2
 ---
 next: 1.1.1
 ---
-@target
+target:
 $$
 \int_0^1 x^n dx
 $$
-+++
+---
+hint:
 You know all you need to know for this one!
 ---
 comment: You are getting better!

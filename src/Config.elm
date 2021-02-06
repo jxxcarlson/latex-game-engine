@@ -19,9 +19,10 @@ id: 1
 ---
 next: 1.1
 ---
-@target
+target:
 Pythagorean theorem: $a^2 + b^2 = c^2$
-+++
+---
+hint:
 Use \\code{a^2} for $a^2$.
 ---
 comment: This is for starters

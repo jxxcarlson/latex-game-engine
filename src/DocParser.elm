@@ -7,7 +7,8 @@ type alias Problem = {
       title : String
     , id : Maybe (List Int)
     , next : Maybe (List Int)
-    , target : List String
+    , target : String
+    , hint : String
     , comment : String
     }
 
@@ -28,7 +29,8 @@ next: 1.1.2
 $$
 \\int x^n dx
 $$
-+++
+---
+@hint
 Use '\\int' for the integral sign
 ---
 comment: This is for starters
@@ -46,7 +48,8 @@ next: 1.1.2
 $$
 \\int x^n dx
 $$
-+++
+---
+@hint
 Use '\\int' for the integral sign
 ---
 comment: This is for starters
@@ -62,7 +65,8 @@ next: 1.1.3
 $$
 \\int_0^1 x^n dx
 $$
-+++
+---
+@hint
 You know all you need to know for this one!
 ---
 comment: You are getting better!
@@ -89,6 +93,7 @@ problemParser =
     |= (kvSParser_ "id" |> map parseId)
     |= (kvSParser_ "next" |> map parseId)
     |= kvLParser_ "target"
+    |= kvLParser_ "hint"
     |= kvSParser_ "comment"
     |. symbol "===\n"
     |. spaces
@@ -232,9 +237,11 @@ kvLParser =
 
 -- > run (kvLParser_ "target") "@target\n$$\n\\int_0^1 x^n dx\n$$\n+++\nUse '\\int' for the integral sign\n---\n"
 -- Ok ["$$\n\\int_0^1 x^n dx\n$$","Use '\\int' for the integral sign\n"]kvLParser_ : String -> Parser (List String)
-kvLParser_ key = 
- succeed (\v -> (String.split "\n+++\n" v |> List.map String.trim))
-   |. symbol ("@" ++ key ++ "\n")
+
+kvLParser_ : String -> Parser String
+kvLParser_ key =
+ succeed identity
+   |. symbol (key ++ ":\n")
    |= getChompedString (chompUntil "---")
    |. symbol "---"
    |. spaces

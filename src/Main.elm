@@ -247,11 +247,8 @@ viewProblem seed mproblem =
 
 renderProblem : Int -> Problem -> Element Msg
 renderProblem seed problem =
-    case List.head problem.target of
-        Nothing -> Element.none
-        Just sourceText ->
-           column [height (px Config.paneHeight), width (px 560), paddingXY 18 0,  Font.size 16, Background.color (rgb 255 255 255)]
-             [renderMath seed sourceText]
+   column [height (px Config.paneHeight), width (px 560), paddingXY 18 0,  Font.size 16, Background.color (rgb 255 255 255)]
+     [renderMath seed problem.target]
 
 
 renderMath : Int -> String -> Element Msg
