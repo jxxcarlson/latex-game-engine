@@ -13,36 +13,73 @@ solutionTitle = "Your code, rendered:"
 
 answerTitle = "Your code:"
 
-initialDocumentText = """title: Welcome
+initialDocumentText = """title: Welcome!
 ---
 author: James Carlson
 ---
 date: 2 Feb 2021
 ---
 description:
-We assume that you have learned about
-subscripts and superscripts.  In this
-lesson you will learn how to write common
-expressions in Calculus: derivatives,
-integrals, etc.
+On the left you will see three "window panes,"
+In the top pane is some rendered LaTeX. The
+idea is that you
+will write some LaTeX source text that recreates
+what you see here.  You write this in the bottom
+pane, with the rendered result displayed in the
+middle.  When you are satisfied that your code
+produces rendered LaTeX that matches that of the
+top pane, press **OK** to mark that problem
+as completed and move to the
+next problem.
+
+In this case the student has made a mistake,
+or perhaps has simply mot completed it.
+Correct the proposed solution now, by adding the text
+`\\int` before `x^n dx`.
+
+**Hints.** Notice the **Show hint**
+button.  If you need help doing the problem,
+press this button.
+
 ---
 
 
-title: Example
+title: Indefinite integral
 ---
 id: 1
 ---
 target:
-Pythagorean theorem: $a^2 + b^2 = c^2$
+$$
+\\int x^n dx
+$$
 ---
 hint:
-Use \\code{a^2} for $a^2$.
+Use \\code{\\int} for the integral sign.
 ---
-comment: This is for starters
+comment:
 ---
-===
+
+
+title: Definite integral
+---
+id: 2
+---
+target:
+$$
+\\int_0^1 x^n dx
+$$
+---
+hint:
+Remember that "_" is for subscripts and "^" is for
+superscripts, e.g, "a_1^2 + a_2^2" produces $a_1^2 + a_2^2$.
+---
+comment:
+---
+
 """
 
 initialSolutionText = """
-Pythagorean theorem: $a^2 + b^2 = c^2$
+$$
+x^n dx
+$$
 """

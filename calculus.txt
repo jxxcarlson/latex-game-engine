@@ -1,4 +1,4 @@
-title: Calculus
+title: Exercises with Calculus
 ---
 author: James Carlson
 ---
@@ -13,7 +13,7 @@ integrals, etc.
 ---
 
 
-title: Integration
+title: Integration, no limits
 ---
 id: 1
 ---
@@ -29,7 +29,7 @@ comment: This is for starters
 ---
 
 # This problem needs more thought
-title: Integration
+title: Integration with limits
 ---
 id: 2
 ---

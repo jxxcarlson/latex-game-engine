@@ -16,7 +16,7 @@ import Element.Font as Font
 import Element.Input as Input
 import File exposing (File)
 import File.Select as Select
-import Problem exposing(Id, Op(..))
+import Problem exposing(Id, Op(..), AugmentedProblem)
 import Task
 import DocParser exposing(Problem, DocumentDescription)
 import MiniLatex.EditSimple
@@ -24,7 +24,8 @@ import Config
 import Random
 import Utility
 import Tree.Zipper as Zipper exposing(Zipper)
-
+import Markdown.Option exposing (MarkdownOption(..), OutputOption(..))
+import Markdown.Render
 
 main =
     Browser.element
@@ -40,8 +41,8 @@ type alias Model =
     , output : String
     , fileContents : Maybe String
     , documentDescription : Maybe DocumentDescription
-    , problems : Zipper Problem
-    , currentProblem : Maybe Problem
+    , problems : Zipper AugmentedProblem
+    , currentProblem : Maybe AugmentedProblem
     , solution: String
     , seed : Int
     , counter : Int
@@ -59,6 +60,7 @@ type Msg
     | ProblemsSelected File
     | ProblemsLoaded String
     | LaTeXMsg MiniLatex.EditSimple.LaTeXMsg
+    | MarkdownMsg Markdown.Render.MarkdownMsg
     | NewSeed Int
     | GetSolution String
     | NextProblem
@@ -74,7 +76,7 @@ type alias Flags =
     }
 
 
-load : String -> (Maybe DocumentDescription, Zipper Problem)
+load : String -> (Maybe DocumentDescription, Zipper AugmentedProblem)
 load input =
     let
           (documentDescription, problems_) =
@@ -89,14 +91,16 @@ load input =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
-      (documentDescription, zipper) = load Config.initialDocumentText
+      (documentDescription, zipper) = load Config.initialDocumentText |> Debug.log "INIT"
+
+      foo = zipper
     in
     ( { input = "App started"
       , output = "App started"
       , fileContents = Nothing
       , documentDescription = documentDescription
       , problems = zipper
-      , currentProblem = Zipper.firstChild zipper |> Maybe.map Zipper.label
+      , currentProblem =  Just (Zipper.label zipper)
       , solution = Config.initialSolutionText
       , seed = flags.seed
       , counter = 0
@@ -117,6 +121,8 @@ update msg model =
             ( model, Cmd.none )
 
         LaTeXMsg _ -> ( model, Cmd.none )
+
+        MarkdownMsg _ -> ( model, Cmd.none )
 
         InputText str ->
             ( { model | input = str, output = str }, Cmd.none )
@@ -160,13 +166,22 @@ update msg model =
             let
                 zipper = Problem.forward model.problems
             in
-            ({model | problems = zipper, currentProblem = Just <| Zipper.label zipper}, Cmd.none)
+            ({model | problems = zipper
+                    , solution = ""
+                    , counter = model.counter + 1
+                    , showInfo = False
+                    , currentProblem = Just <| Zipper.label zipper}
+                    , Cmd.none)
 
         PrevProblem ->
             let
                 zipper = Problem.backward model.problems
             in
-            ({model | problems = zipper, currentProblem = Just <| Zipper.label zipper}, Cmd.none)
+            ({model | problems = zipper
+                    , solution = ""
+                    , counter = model.counter + 1
+                    , showInfo = False
+                    , currentProblem = Just <| Zipper.label zipper}, Cmd.none)
 
         OK -> (model, Cmd.none)
 
@@ -200,8 +215,8 @@ noFocus =
 mainView : Model -> Element Msg
 mainView model =
   column [centerX] [
-       row [width (px Config.appWidth), centerX, paddingXY 0 12] [ title Config.appTitle ]
-     , row [  spacing 20 ] [ lhs model, rhs model ]
+      -- row [width (px Config.appWidth), centerX, paddingXY 0 12] [ title Config.appTitle ]
+      row [  spacing 20 ] [ lhs model, rhs model ]
     ]
 
 
@@ -221,12 +236,15 @@ lhs model =
                  loadButton
                , okButton
                , nextButton
-               , prevButton ]
+               , prevButton
+               ,el [] (toggleInfo model.showInfo)]
+
+            , showIf model.showInfo <| showHint model.seed model.currentProblem
             , el [Font.size 12, Font.italic, alignBottom ](outputDisplay model)
             ]
         ]
 
-problemTitle : Maybe Problem -> Element Msg
+problemTitle : Maybe AugmentedProblem -> Element Msg
 problemTitle mprob =
     case mprob of
         Nothing -> Element.none
@@ -243,27 +261,61 @@ rhs : Model -> Element Msg
 rhs model =
     column rhsColumnStyle
         [ column [  spacing 10 ]
-            [  el [moveRight 8] (toggleInfo model.showInfo)
-               , showIf model.showInfo <| showHint model.seed model.currentProblem
-               , showIf model.showInfo <| showComment model.seed model.currentProblem
+            [
+                el [Font.bold, Font.size 24] (text (Maybe.map .title model.documentDescription |> Maybe.withDefault "Exercises"))
+               , el [Font.bold, Font.size 14] (text (Maybe.map .author model.documentDescription |> Maybe.withDefault "Exercises"))
+               , el [Font.bold, Font.size 14] (text (Maybe.map .date model.documentDescription |> Maybe.withDefault "Exercises"))
+               , renderedSource model.counter (Maybe.map .description model.documentDescription |>  Maybe.withDefault "Exercises")
+               , showComment model.seed model.currentProblem
 
             ]
         ]
+
+renderedSource : Int -> String -> Element Msg
+renderedSource counter sourceText =
+    (Keyed.node "div"
+        renderedSourceStyle
+        [ ( String.fromInt counter, Markdown.Render.toHtml ExtendedMath sourceText |> Html.map MarkdownMsg ) ]
+        ) |> Element.html
+
+
+renderedSourceStyle : List (Html.Attribute msg)
+renderedSourceStyle =
+    textStyle "300px" "400px" "#fff"
+
+
+textStyle : String -> String -> String -> List (Html.Attribute msg)
+textStyle width height color =
+    [ HA.style "width" width
+    , HA.style "height" height
+    , HA.style "margin-top" "18px"
+    , HA.style "background-color" color
+    , HA.style "margin-right" "20px"
+    , HA.style "white-space" "pre-wrap"
+    , HA.style "padding" "20px"
+    , HA.style "overflow" "scroll"
+    , HA.style "float" "left"
+    , HA.style "border-width" "1px"
+    , HA.style "font-size" "14px"
+    , HA.style "line-height" "1.5"
+    ]
+fixLines : String -> String
+fixLines str =
+   String.replace "\n" " " str
 
 showIf : Bool -> Element Msg -> Element Msg
 showIf show element =
     if show then  element else Element.none
 
-showHint : Int -> Maybe Problem -> Element Msg
+showHint : Int -> Maybe AugmentedProblem -> Element Msg
 showHint seed mprob =
     case mprob of
         Nothing -> Element.none
-        Just prob -> column[width (px 300) ] [
-               el [Font.size 14, Font.bold, moveRight 8] (text "Hint")
-             , column [Font.size 13, width (px 280), padding 10] [renderMath seed hintStyle prob.hint]
+        Just prob -> column[width (px 600) ] [
+              column [Font.size 13, width (px 580), padding 10] [renderMath seed hintStyle prob.hint]
              ]
 
-showComment : Int -> Maybe Problem -> Element Msg
+showComment : Int -> Maybe AugmentedProblem -> Element Msg
 showComment seed mprob =
     case mprob of
         Nothing -> Element.none
@@ -276,7 +328,8 @@ showComment seed mprob =
                      ]
 
 hintStyle = [  HA.style "background-color" "white"
-             , HA.style "width" "280px"
+             , HA.style "width" "540px"
+             , HA.style "margin-left" "-8px"
              , HA.style "padding-top" "1px"
              , HA.style "padding-bottom" "1px"
              , HA.style "padding-left" "9px"
@@ -299,7 +352,7 @@ viewSolution  seed solution =
   column  problemStyle
      [renderMath seed [] solution]
 
-viewProblem : Int -> Maybe Problem -> Element Msg
+viewProblem : Int -> Maybe AugmentedProblem -> Element Msg
 viewProblem seed mproblem =
     case mproblem of
         Nothing -> el [] (text "No problem loaded")
@@ -309,7 +362,7 @@ viewProblem seed mproblem =
 
 -- RENDER
 
-renderProblem : Int -> Problem -> Element Msg
+renderProblem : Int -> AugmentedProblem -> Element Msg
 renderProblem seed problem =
    column problemStyle
      [renderMath  seed  [] problem.target]
@@ -368,7 +421,7 @@ inputText model =
 toggleInfo : Bool -> Element Msg
 toggleInfo showInfo =
     let
-        label = if showInfo then "Hide Info" else "Show Info"
+        label = if showInfo then "Hide hint" else "Show hint"
     in
     row [ ]
         [ Input.button buttonStyle
@@ -429,7 +482,7 @@ mainColumnStyle =
     , Background.color (rgb255 g g g)
     , paddingXY 20 20
     , width (px 600)
-    , height fill
+    , height (px 800)
     ]
 
 rhsColumnStyle =
@@ -438,7 +491,7 @@ rhsColumnStyle =
     , Background.color (gray 200)
     , paddingXY 20 20
     , width (px 400)
-    , height fill
+    , height (px 800)
     ]
 
 buttonStyle =
