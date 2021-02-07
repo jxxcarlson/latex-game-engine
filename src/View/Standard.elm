@@ -37,18 +37,19 @@ lhs model =
             , viewSolution model.counter model.solution
             , heading Config.answerTitle
             , viewEditor model
-            , row [spacing 12, paddingXY 0 12] [
-                 loadButton
-               , okButton
-               , nextButton
-               , prevButton
+            , showComment model.seed model.currentProblem
+            , row [spacing 18, paddingXY 0 12] [
+               loadButton
+               , row [spacing 6] [
+                     prevButton
+                   , okButton
+                   , nextButton
+                  ]
                ,el [] (toggleInfo model.showInfo)
                , showStatus model.currentProblem
                , showScore model
 
                ]
-             , showComment model.seed model.currentProblem
-
             , View.Common.showIf model.showInfo <| showHint model.seed model.currentProblem
             ]
         ]
@@ -95,9 +96,9 @@ rhs model =
                 el [Font.bold, Font.size 24] (text (Maybe.map .title model.documentDescription |> Maybe.withDefault "Exercises"))
                , el [Font.bold, Font.size 14] (text (Maybe.map .author model.documentDescription |> Maybe.withDefault "Exercises"))
                , el [Font.bold, Font.size 14] (text (Maybe.map .date model.documentDescription |> Maybe.withDefault "Exercises"))
-               , View.Common.showIf model.documentDescriptionVisible
+               , View.Common.showIf ( model.numberOfProblemsCompleted == 0 && model.documentDescriptionVisible)
                   (renderedSource model.counter (Maybe.map .description model.documentDescription |>  Maybe.withDefault "Exercises"))
-               , View.Common.showIf (not model.documentDescriptionVisible )
+               , View.Common.showIf ( model.numberOfProblemsCompleted /= 0 || not model.documentDescriptionVisible)
                  (column [spacing 8, height (px 500), scrollbarY] (
                  List.map (summary (Maybe.map Problem.deAugment model.currentProblem)) (List.reverse model.editorModel.problemList)))
             ]
@@ -113,7 +114,7 @@ summary : Maybe Problem -> Problem -> Element Msg
 summary mproblem problem =
     let
       fontColor = if mproblem == Just problem then
-                     Element.rgb 0.8 0 0
+                     Element.rgb 0.7 0 0
                   else
                      Element.rgb 0 0 0
 
@@ -157,8 +158,9 @@ showComment seed mprob =
             if String.length prob.comment < 3  then Element.none
             else
                 column[ ] [
-                       el [Font.size 14, Font.bold, moveRight 8] (text "Directions")
-                     , column [Font.size 13, padding 10] [renderMath seed (commentStyle Config.panelWidth) prob.comment]
+                       el [Font.size 14, Font.italic, moveRight 8] (text "Directions")
+                     , column [Font.size 13, padding 10]
+                      [renderMath seed (commentStyle Config.paneWidth Config.paneHeight) prob.comment]
                      ]
 
 
@@ -280,7 +282,7 @@ prevButton =
     row [ ]
         [ Input.button buttonStyle
             { onPress = Just PrevProblem
-            , label = el labelStyle (text "Prev")
+            , label = el labelStyle (text <| String.fromChar '\u{25c0}')
             }
         ]
 
@@ -289,7 +291,7 @@ nextButton =
     row [ ]
         [ Input.button buttonStyle
             { onPress = Just NextProblem
-            , label = el labelStyle (text "Next")
+            , label = el labelStyle (text <| String.fromChar '\u{25b6}')
             }
         ]
 

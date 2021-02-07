@@ -154,7 +154,7 @@ update msg model =
 
         OK ->
             case model.currentProblem of
-                Nothing -> (model, Cmd.none)
+                Nothing -> ({model |showInfo = False} , Cmd.none)
                 Just prob ->
                     let
                         zipper1 = Problem.setCompleted True prob model.problems

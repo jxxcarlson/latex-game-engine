@@ -19,7 +19,7 @@ toggleAppMode : AppMode -> Element Msg
 toggleAppMode appMode =
     let
         label = case appMode of
-            StandardMode -> "Standard"
+            StandardMode -> "Go to Editor"
             EditMode -> "Editor"
     in
     row [ ]

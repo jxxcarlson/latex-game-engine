@@ -57,8 +57,9 @@ hintStyle = [  HA.style "background-color" "white"
              , HA.style "padding-right" "8px"
              ]
 
-commentStyle w = [  HA.style "background-color" "white"
+commentStyle w h = [  HA.style "background-color" "white"
              , HA.style "width" (String.fromInt w ++ "px")
+             , HA.style "height" (String.fromInt h ++ "px")
              , HA.style "margin-top" "0px"
              , HA.style "margin-left" "-8px"
              , HA.style "padding-top" "2px"

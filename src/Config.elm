@@ -1,9 +1,9 @@
 module Config exposing (..)
 
 paneHeight : Int
-paneHeight = 120
+paneHeight = 100
 
-panelWidth = 540
+paneWidth = 540
 
 appWidth = 900
 
@@ -13,9 +13,9 @@ appTitle = "LaTeX Challenge"
 
 problemTitle = "Write LaTeX to imitate this:"
 
-solutionTitle = "Your code, rendered:"
+solutionTitle = "Your source text, rendered:"
 
-answerTitle = "Your code:"
+answerTitle = "Your source text:"
 
 initialDocumentText = """title: Welcome!
 ---
@@ -27,19 +27,18 @@ description:
 On the left you will see three "window panes,"
 In the top pane is some rendered LaTeX. The
 idea is that you
-will write some LaTeX source text that recreates
-what you see here.  You write this in the bottom
-pane, with the rendered result displayed in the
-middle.  When you are satisfied that your code
-produces rendered LaTeX that matches that of the
-top pane, press **OK** to mark that problem
-as completed and move to the
+will write some LaTeX source text in the third
+pane that recreates
+what you see here.  The rendered result is displaye
+above what you have written.  When you are satisfied with what you have
+written, press **OK** to mark that problem
+as completed. The app moves you on to the
 next problem.
 
 In this case the student has made a mistake,
-or perhaps has simply mot completed it.
-Correct the proposed solution now, by adding the text
-`\\int` before `x^n dx`.
+or perhaps has simply mot completed it. *Correct
+the proposed solution now by adding the text*
+`\\int` *before* `x^n dx`.
 
 **Status and Score.** The *status* of a
 problem, as well as the current score,
@@ -60,15 +59,15 @@ title: Indefinite integral
 ---
 id: 1
 ---
-target:
-$$
+target:$$
 \\int x^n dx
 $$
 ---
 hint:
 Use \\code{\\int} for the integral sign.
 ---
-comment:
+comment: Your first problem.  Give it a try!
+Ask for a hint if you need to.
 ---
 
 
@@ -82,10 +81,9 @@ $$
 $$
 ---
 hint:
-Remember that "_" is for subscripts and "^" is for
-superscripts, e.g, "a_1^2 + a_2^2" produces $a_1^2 + a_2^2$.
 ---
-comment:
+comment: Remember that "_" is for subscripts and "^" is for
+superscripts, e.g, "a_1^2 + a_2^2" produces $a_1^2 + a_2^2$.
 ---
 
 """
