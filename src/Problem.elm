@@ -1,4 +1,5 @@
-module Problem exposing (AugmentedProblem, findById, Id, Op(..), toZipper, firstChild, forward, backward)
+module Problem exposing (AugmentedProblem, setCompleted,
+   numberOfCompletedProblems, numberOfProblems, findById, Id, Op(..), toZipper, firstChild, forward, backward)
 
 import DocParser exposing(Problem)
 import HTree
@@ -35,7 +36,7 @@ rootProblem = {
     , target = ""
     , hint  = ""
     , comment = ""
-    , completed = True
+    , completed = False
     }
 
 type Op = Next | Prev
@@ -80,3 +81,16 @@ backward z =
     case Zipper.backward z of
         Nothing -> z
         Just z_ -> z_
+
+setCompleted : Bool -> AugmentedProblem -> Zipper  AugmentedProblem ->  Zipper  AugmentedProblem
+setCompleted bit prob zipper =
+    Zipper.replaceLabel { prob | completed = bit } zipper
+
+
+numberOfProblems : Zipper AugmentedProblem -> Int
+numberOfProblems zipper =
+    (List.length (Tree.flatten (Zipper.toTree zipper))) - 1
+
+numberOfCompletedProblems : Zipper AugmentedProblem -> Int
+numberOfCompletedProblems zipper =
+    List.length (Tree.flatten (Zipper.toTree zipper) |> List.filter (\p -> p.completed == True))

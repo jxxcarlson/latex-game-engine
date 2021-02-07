@@ -37,6 +37,14 @@ or perhaps has simply mot completed it.
 Correct the proposed solution now, by adding the text
 `\\int` before `x^n dx`.
 
+**Status and Score.** The *status* of a
+problem, as well as the current score,
+ is displayed in the control panel,
+the row of button **Load** **OK** etc.
+Here is an example: *complete: NO* **1/2**.
+One problem out of a total of two is complete,
+but the current problem is not complete.
+
 **Hints.** Notice the **Show hint**
 button.  If you need help doing the problem,
 press this button.

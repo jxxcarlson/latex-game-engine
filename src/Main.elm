@@ -36,6 +36,8 @@ main =
         }
 
 
+-- MODEL
+
 type alias Model =
     { input : String
     , output : String
@@ -47,6 +49,8 @@ type alias Model =
     , seed : Int
     , counter : Int
     , showInfo : Bool
+    , numberOfProblems : Int
+    , numberOfProblemsCompleted : Int
     }
 
 
@@ -105,6 +109,8 @@ init flags =
       , seed = flags.seed
       , counter = 0
       , showInfo = False
+      , numberOfProblems  = Problem.numberOfProblems zipper
+      , numberOfProblemsCompleted = 0
       }
     , Cmd.none
     )
@@ -151,6 +157,8 @@ update msg model =
                            , output =  fileStatus (Just content)
                            , solution =  "nothing yet"
                            , counter = model.counter + 1
+                           , numberOfProblems = Problem.numberOfProblems zipper
+                           , numberOfProblemsCompleted = 0
                         }
                       , Cmd.none
                       )
@@ -183,7 +191,21 @@ update msg model =
                     , showInfo = False
                     , currentProblem = Just <| Zipper.label zipper}, Cmd.none)
 
-        OK -> (model, Cmd.none)
+        OK ->
+            case model.currentProblem of
+                Nothing -> (model, Cmd.none)
+                Just prob ->
+                    let
+                        zipper1 = Problem.setCompleted True prob model.problems
+                        zipper2 = Problem.forward zipper1
+                    in
+                        ({model | problems = zipper2
+                                , showInfo = False
+                                , counter = model.counter + 1
+                                , currentProblem =  Just (Zipper.label zipper2)
+                                , numberOfProblemsCompleted = Problem.numberOfCompletedProblems zipper2
+                             }
+                            , Cmd.none)
 
         ToggleInfo -> ({model | showInfo = not model.showInfo}, Cmd.none)
 
@@ -237,12 +259,37 @@ lhs model =
                , okButton
                , nextButton
                , prevButton
-               ,el [] (toggleInfo model.showInfo)]
+               ,el [] (toggleInfo model.showInfo)
+               , showStatus model.currentProblem
+               , showScore model
+
+               ]
 
             , showIf model.showInfo <| showHint model.seed model.currentProblem
             , el [Font.size 12, Font.italic, alignBottom ](outputDisplay model)
             ]
         ]
+
+showScore : Model -> Element Msg
+showScore model =
+    let
+        completed = String.fromInt model.numberOfProblemsCompleted
+        all = String.fromInt model.numberOfProblems
+    in
+     el [Font.size 18, Font.bold ](text <| completed ++ "/" ++ all)
+
+showStatus : Maybe AugmentedProblem -> Element Msg
+showStatus mprob =
+    case mprob of
+        Nothing -> Element.none
+        Just prob ->
+            let
+               msg =  if prob.completed then "YES" else "NO"
+            in
+              el [Font.size 14] (text ("Complete: " ++ msg))
+
+
+
 
 problemTitle : Maybe AugmentedProblem -> Element Msg
 problemTitle mprob =
@@ -289,6 +336,7 @@ textStyle width height color =
     [ HA.style "width" width
     , HA.style "height" height
     , HA.style "margin-top" "18px"
+    , HA.style "margin-bottom" "18px"
     , HA.style "background-color" color
     , HA.style "margin-right" "20px"
     , HA.style "white-space" "pre-wrap"
@@ -322,9 +370,9 @@ showComment seed mprob =
         Just prob ->
             if String.length prob.comment < 3  then Element.none
             else
-                column[width (px 300) ] [
+                column[width (px 380) ] [
                        el [Font.size 14, Font.bold, moveRight 8] (text "Comment")
-                     , column [Font.size 13, width (px 280), padding 10] [renderMath seed hintStyle prob.comment]
+                     , column [Font.size 13, width (px 380), padding 10] [renderMath seed commentStyle prob.comment]
                      ]
 
 hintStyle = [  HA.style "background-color" "white"
@@ -336,6 +384,15 @@ hintStyle = [  HA.style "background-color" "white"
              , HA.style "padding-right" "8px"
              ]
 
+commentStyle = [  HA.style "background-color" "white"
+             , HA.style "width" "320px"
+             , HA.style "margin-top" "0px"
+             , HA.style "margin-left" "-8px"
+             , HA.style "padding-top" "2px"
+             , HA.style "padding-bottom" "2px"
+             , HA.style "padding-left" "9px"
+             , HA.style "padding-right" "8px"
+             ]
 
 viewEditor : Model -> Element Msg
 viewEditor model =
