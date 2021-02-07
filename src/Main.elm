@@ -1,10 +1,5 @@
 module Main exposing (main)
 
-{- This is a starter app which presents a text label, text field, and a button.
-   What you enter in the text field is echoed in the label.  When you press the
-   button, the text in the label is reverse.
-   This is the Elements version.  It uses uses `mdgriffith/elm-ui` for the view functions.
--}
 
 import Browser
 import Html exposing (Html)
@@ -21,8 +16,10 @@ import Style exposing(..)
 import Utility
 import Tree.Zipper as Zipper exposing(Zipper)
 import Msg exposing(..)
-import View.Standard
-import Model exposing(Model)
+import View.Standard as Standard
+import View.Editor as Editor
+import Model exposing(Model, AppMode(..))
+import Editor exposing(EditorModel, EditorMsg(..))
 
 main =
     Browser.element
@@ -32,8 +29,6 @@ main =
         , subscriptions = subscriptions
         }
 
-
-
 type alias Flags =
     { seed : Int
     , width : Int
@@ -41,24 +36,11 @@ type alias Flags =
     }
 
 
-load : String -> (Maybe DocumentDescription, Zipper AugmentedProblem)
-load input =
-    let
-          (documentDescription, problems_) =
-             case DocParser.parseDocument input of
-                Nothing -> (Nothing, [])
-                Just (desc, probs) -> (Just desc, probs)
-
-          zipper = Problem.toZipper problems_
-    in
-      (documentDescription, zipper)
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
       (documentDescription, zipper) = load Config.initialDocumentText |> Debug.log "INIT"
-
-      foo = zipper
     in
     ( { input = "App started"
       , output = "App started"
@@ -72,6 +54,8 @@ init flags =
       , showInfo = False
       , numberOfProblems  = Problem.numberOfProblems zipper
       , numberOfProblemsCompleted = 0
+      , appMode = StandardMode
+      , editorModel = Editor.initModel
       }
     , Cmd.none
     )
@@ -170,16 +154,22 @@ update msg model =
 
         ToggleInfo -> ({model | showInfo = not model.showInfo}, Cmd.none)
 
-fileStatus : Maybe String -> String
-fileStatus mstr =
-    case mstr of
-        Nothing -> "No file contents loaded"
-        Just stuff -> String.fromInt (String.length stuff) ++ " bytes read"
+        ToggleAppMode ->
+            let
+              newMode = case model.appMode of
+                  StandardMode -> EditMode
+                  EditMode -> StandardMode
+            in
+              ({ model | appMode = newMode}, Cmd.none)
 
---
--- VIEW
---
-
+        E editorMsg ->
+          case editorMsg of
+            GoToStandarMode ->
+               ({ model | appMode = StandardMode}, Cmd.none)
+            _ -> let
+                   (newEditorModel, cmd) = Editor.update editorMsg model.editorModel
+                 in
+                   ({model | editorModel = newEditorModel}, cmd |> Cmd.map E)
 
 
 view : Model -> Html Msg
@@ -188,6 +178,14 @@ view model =
        [Background.color (gray 60)]
        (mainView model)
 
+mainView model =
+    case model.appMode of
+        StandardMode -> Standard.view model
+        EditMode -> Editor.view model.editorModel |> Element.map E
+
+
+-- HELPERS
+
 noFocus : Element.FocusStyle
 noFocus =
     { borderColor = Nothing
@@ -195,9 +193,22 @@ noFocus =
     , shadow = Nothing
     }
 
-mainView : Model -> Element Msg
-mainView model =
-  column [centerX] [
-      row [  spacing 20 ] [ View.Standard.lhs model, View.Standard.rhs model ]
-    ]
 
+fileStatus : Maybe String -> String
+fileStatus mstr =
+    case mstr of
+        Nothing -> "No file contents loaded"
+        Just stuff -> String.fromInt (String.length stuff) ++ " bytes read"
+
+
+load : String -> (Maybe DocumentDescription, Zipper AugmentedProblem)
+load input =
+    let
+          (documentDescription, problems_) =
+             case DocParser.parseDocument input of
+                Nothing -> (Nothing, [])
+                Just (desc, probs) -> (Just desc, probs)
+
+          zipper = Problem.toZipper problems_
+    in
+      (documentDescription, zipper)

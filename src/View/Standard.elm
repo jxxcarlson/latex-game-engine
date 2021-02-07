@@ -1,4 +1,4 @@
-module View.Standard exposing (..)
+module View.Standard exposing (view)
 
 import Html exposing (Html)
 import Html.Keyed as Keyed
@@ -14,7 +14,15 @@ import Style exposing(..)
 import Markdown.Option exposing (MarkdownOption(..), OutputOption(..))
 import Markdown.Render
 import Msg exposing(..)
-import Model exposing(Model)
+import Model exposing(Model, AppMode(..))
+import View.Common
+
+
+view : Model -> Element Msg
+view model =
+  column [centerX] [
+      row [  spacing 20 ] [lhs model, rhs model ]
+    ]
 
 
 lhs : Model -> Element Msg
@@ -41,7 +49,6 @@ lhs model =
                ]
 
             , showIf model.showInfo <| showHint model.seed model.currentProblem
-            , el [Font.size 12, Font.italic, alignBottom ](outputDisplay model)
             ]
         ]
 
@@ -90,7 +97,11 @@ rhs model =
                , renderedSource model.counter (Maybe.map .description model.documentDescription |>  Maybe.withDefault "Exercises")
                , showComment model.seed model.currentProblem
 
+
             ]
+            , row [alignBottom, spacing 18] [el [alignBottom] (View.Common.toggleAppMode model.appMode)
+                  , el [Font.size 12, Font.italic, alignBottom ](outputDisplay model)
+                  ]
         ]
 
 renderedSource : Int -> String -> Element Msg

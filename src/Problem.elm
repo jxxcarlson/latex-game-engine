@@ -1,5 +1,6 @@
 module Problem exposing (AugmentedProblem, setCompleted,
-   numberOfCompletedProblems, numberOfProblems, findById, Id, Op(..), toZipper, firstChild, forward, backward)
+   numberOfCompletedProblems, numberOfProblems,
+   problemListToString, findById, Id, Op(..), toZipper, firstChild, forward, backward)
 
 import DocParser exposing(Problem)
 import HTree
@@ -52,7 +53,28 @@ level prob =
         Just id_ -> List.length id_
 
 
+problemListToString : List Problem -> String
+problemListToString problems =
+    List.map problemToString problems
+      |> String.join "\n\n"
 
+problemToString : Problem -> String
+problemToString problem =
+    [ fieldToString "title" problem.title
+   , idToString problem.id
+   , fieldToString "target" problem.target
+   , fieldToString "hint" problem.hint
+   , fieldToString "comment" problem.comment] |> String.join "\n"
+
+idToString :Maybe (List Int) -> String
+idToString mis =
+    case mis of
+        Nothing -> fieldToString "id" ""
+        Just is ->  fieldToString "id" (String.join "." (List.map String.fromInt is))
+
+fieldToString : String -> String -> String
+fieldToString name value =
+    name ++ ":" ++ value ++ "\n---"
 
 toZipper : List Problem -> Zipper AugmentedProblem
 toZipper problems =

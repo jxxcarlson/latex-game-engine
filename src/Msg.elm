@@ -3,6 +3,7 @@ module Msg exposing (..)
 import MiniLatex.EditSimple
 import Markdown.Render
 import File exposing(File)
+import Editor
 
 
 type Msg
@@ -20,3 +21,5 @@ type Msg
     | PrevProblem
     | OK
     | ToggleInfo
+    | ToggleAppMode
+    | E Editor.EditorMsg

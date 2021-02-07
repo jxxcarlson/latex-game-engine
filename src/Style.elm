@@ -6,6 +6,7 @@ import Element.Background as Background
 import Element.Font as Font
 import Html.Attributes as HA
 import Html exposing (Html)
+import Config
 
 -- STYLE
 
@@ -22,7 +23,7 @@ mainColumnStyle =
     , Background.color (rgb255 g g g)
     , paddingXY 20 20
     , width (px 600)
-    , height (px 800)
+    , height (px Config.appHeight)
     ]
 
 rhsColumnStyle =
@@ -31,7 +32,7 @@ rhsColumnStyle =
     , Background.color (gray 200)
     , paddingXY 20 20
     , width (px 400)
-    , height (px 800)
+    , height (px Config.appHeight)
     ]
 
 buttonStyle =

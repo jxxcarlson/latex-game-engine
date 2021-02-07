@@ -5,6 +5,8 @@ paneHeight = 150
 
 appWidth = 900
 
+appHeight = 750
+
 appTitle = "LaTeX Challenge"
 
 problemTitle = "Write LaTeX to imitate this:"
