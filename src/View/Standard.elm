@@ -99,8 +99,9 @@ rhs model =
                   (renderedSource model.counter (Maybe.map .description model.documentDescription |>  Maybe.withDefault "Exercises"))
 
             ]
+            , el [Font.size 12, Font.italic, paddingXY 0 12](outputDisplay model)
             , row [alignBottom, spacing 18] [el [alignBottom] (View.Common.toggleAppMode model.appMode)
-                  , el [Font.size 12, Font.italic, alignBottom ](outputDisplay model)
+
                   ]
         ]
 
@@ -130,7 +131,7 @@ showComment seed mprob =
             if String.length prob.comment < 3  then Element.none
             else
                 column[ ] [
-                       el [Font.size 14, Font.bold, moveRight 8] (text "Comment")
+                       el [Font.size 14, Font.bold, moveRight 8] (text "Directions")
                      , column [Font.size 13, padding 10] [renderMath seed (commentStyle Config.panelWidth) prob.comment]
                      ]
 

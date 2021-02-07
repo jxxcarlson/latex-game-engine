@@ -26,6 +26,41 @@ errorDescription = {
   , description = "There is an error in Config.initialDocument"
   }
 
+runWithErrorReporter : Parser a -> String -> Result String a
+runWithErrorReporter parser input  =
+    case run parser input of
+        Ok result -> Ok result
+        Err err -> Err (List.map (errorReport input) err |> String.join "\n\n")
+
+
+errorReport : String ->  { a | row : Int, col : Int, problem : Parser.Problem } -> String
+errorReport input err  =
+    "at " ++ String.fromInt err.row
+     ++ ", " ++ String.fromInt err.col
+     ++ ": " ++ reportProblem err.problem
+     ++ "\n" ++ getLinesAround err.row input
+
+
+getLinesAround : Int -> String -> String
+getLinesAround line input =
+    input
+      |> String.lines
+      |> List.indexedMap (\k l -> String.fromInt k ++ ": " ++ l)
+      |> slice (line - 2) (line + 3)
+      |> String.join "\n"
+
+slice : Int -> Int -> List a -> List a
+slice from to list =
+    list
+      |> List.take to
+      |> List.drop from
+
+reportProblem : Parser.Problem -> String
+reportProblem p =
+    case p of
+        Expecting e -> "expecting: " ++ e
+        ExpectingSymbol s -> "expecting symbol: " ++ s
+        _ -> "Unknown error type"
 
 type alias KVRecord = List KV
 
@@ -47,9 +82,9 @@ problems input =
        Err _ -> []
 
 
-parseDocument : String -> Result (List DeadEnd) (DocumentDescription, List Problem)
+parseDocument : String -> Result String (DocumentDescription, List Problem)
 parseDocument input =
-    run documentParser input
+    runWithErrorReporter documentParser input |> Debug.log "PARSE"
 
 documentParser : Parser (DocumentDescription, List Problem)
 documentParser =
@@ -121,8 +156,6 @@ prob = """title: Integration
 ---
 id: 1.1.1
 ---
-next: 1.1.2
----
 @target
 $$
 \\int x^n dx
@@ -133,7 +166,37 @@ Use '\\int' for the integral sign
 ---
 comment: This is for starters
 ---
-===
+
+"""
+
+prob2 = """title: Integration
+---
+id: 1.1.1
+---
+target:
+$$
+\\int x^n dx
+$$
+---
+hint:
+Use '\\int' for the integral sign
+---
+comment: This is for starters
+--
+
+"""
+
+prob3 = """
+title:Symbols
+---
+id:1
+---
+target: $\\alpha + \\beta + \\gamma = \\pi$
+hint:
+---
+comment: Enclose your formula with dollar signs: \\dollar ... \\dollar.
+Use \\bs{alpha} for $\\alpha$, and so on.
+---
 """
 
 probs = """title: Integration

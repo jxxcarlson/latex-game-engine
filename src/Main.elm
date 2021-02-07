@@ -222,7 +222,7 @@ load input =
     case DocParser.parseDocument input of
         Ok (documentDescription, problems_) ->
             Ok { desc = documentDescription, problems = problems_, zipper = Problem.toZipper problems_}
-        Err _ -> Err "Error parsing document"
+        Err err -> Err ("Errors: " ++ err)
 
 
 addDocumentDescription : Maybe DocumentDescription -> EditorModel -> EditorModel
