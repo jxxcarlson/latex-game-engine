@@ -161,8 +161,9 @@ update msg model =
                         zipper2 = Problem.forward zipper1
                     in
                         ({model | problems = zipper2
-                                , showInfo = False
+                                , solution = ""
                                 , counter = model.counter + 1
+                                , showInfo = False
                                 , currentProblem =  Just (Zipper.label zipper2)
                                 , numberOfProblemsCompleted = Problem.numberOfCompletedProblems zipper2
                              }

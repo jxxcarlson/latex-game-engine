@@ -1,0 +1,197 @@
+title:Basics
+---
+author:James Carlson
+---
+date:7 Feb 2021
+---
+description:You will learn how to do simple math formuluas: supscripts, superscripts, series and sums, integrals, derivatives, etc.
+---
+
+title:Symbols
+---
+id:1
+---
+target: $\alpha + \beta + \gamma = \pi$
+---
+hint:
+---
+comment: Enclose your formula with dollar signs: \dollar ... \dollar.
+Use \bs{alpha} for $\alpha$, and so on.
+---
+
+title:Integrals
+---
+id:1.1
+---
+target: $$\int x dx$$
+---
+hint:
+---
+comment: Here you will need \code{\bs{int}} for $\int$.  Snippets of
+LaTeX code like \code{\bs{int}}  are called \italic{macros}.
+
+This time, put your LaTeX code betwen double dollar signs:
+\dollar\dollar .. \dollar\dollar.  This is \italic{display math mode}.
+---
+
+title:Spacing
+---
+id:1.2
+---
+target: $$\int x\ dx$$
+---
+hint:
+---
+comment: Sometimes you need to adjust the spacing.  If you put \code{\bs{space}}
+between the \code{x} and the \code{dx}, the formula will look better.
+You can also put a backslash followed by a space.
+---
+
+title:Superscripts
+---
+id:2
+---
+target:Pythagoras said that $ a^2 + b^2 = c^2 $
+---
+hint:
+---
+comment:Use \code{^} for superscripts, e.g, \code{x^2} for $x^2$.
+Notice the form: ordinary text, with the mathematics
+between dollar signs. This is \italic{inline math mode} once again.
+---
+
+title:Superscripts and Integrals
+---
+id:2.1
+---
+target:$$
+\int x^2 dx
+$$
+---
+hint:
+---
+comment:You know what to do here!  Combine what you know
+about symbols with what you know about superscripts.
+
+This is \italic{display math mode} once again.
+---
+
+
+title:Fractions
+---
+id:2.2
+---
+target:$$
+\int x^2 dx = \frac{x^3}{3} + C
+$$
+---
+hint:
+---
+comment: You will need to use the \code{\bs{frac}} macro.  It works
+like this: \code{\bs{frac}\texarg{numerator}\texarg{denomianator}}.
+
+If you don't like the looks of the result, try putting the macro
+\code{\bs{small}} just before the \code{\bs{frac}}.
+---
+
+title:Subscripts
+---
+id:3
+---
+target:$$
+a_1, a_2, a_3
+$$
+---
+hint:Use \code{_} for subscripts, e.g., \code{a_1} for $a_1$.
+---
+comment:Use \code{_} for subscripts, e.g., \code{a_1} for $a_1$.
+\code{\ldots}  is a \italic{macro}.  It puts three dots along
+the baseline.There are lots of these!  Notice the double dollar signs.
+This is \italic{display math mode}.
+---
+
+title:On and on
+---
+id:3.1
+---
+target:$$
+a_1, a_2, a_3, \ldots
+$$
+---
+hint:Use \code{_} for subscripts, e.g., \code{a_1} for $a_1$.
+---
+comment:\code{\ldots}  is a \italic{macro}.  It puts three dots along
+the baseline.There are lots of these!
+---
+
+title:Subscripts and superscripts
+---
+id:4
+---
+target:$$
+a_1^2 + a_2^2 + a_3^2 + \ldots
+$$
+---
+hint:The previous two problems gave you what you need to do this one.
+---
+comment:
+---
+
+title:Complex subscirpts
+---
+id:4.1
+---
+target:$$
+a_{10}^2 + a_{11}^2 + a_{12}^2 + \ldots
+$$
+---
+hint:The previous two problems gave you what you need to do this one.
+---
+comment:When the subscript consists of more than a single character
+or entity, enclose it in curly braces, like this:
+\code{x_\texarg{abc}} for $x_{abc}$.
+---
+
+title:Sums
+---
+id:5
+---
+target:$$
+\sum_{i=0}^6 a_i
+$$
+---
+hint:Use curly braces to group the parts of the subscript, like this
+\code{\texarg{i=0}}.
+---
+comment:Sums follow the same pattern as integrals, except
+that you use \code{\bs{sum}} in place of \code{\bs{int}}. Oh ...
+remember what we said earlier about complex subscripts.
+---
+
+title:An infinite sum
+---
+id:5.1
+---
+target:$$
+\sum_{i=1}^\infty a_i
+$$
+---
+hint:
+---
+comment:Use \code{\bs{infty}} for $\infty$.
+---
+
+
+
+title:Harmonic series
+---
+id:5.1
+---
+target:$$
+\sum_{n=1}^\infty \small\frac{1}{n}
+$$
+---
+hint:
+---
+comment:You know everything you need for this one!
+---

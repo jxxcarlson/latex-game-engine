@@ -97,13 +97,39 @@ rhs model =
                , el [Font.bold, Font.size 14] (text (Maybe.map .date model.documentDescription |> Maybe.withDefault "Exercises"))
                , View.Common.showIf model.documentDescriptionVisible
                   (renderedSource model.counter (Maybe.map .description model.documentDescription |>  Maybe.withDefault "Exercises"))
-
+               , View.Common.showIf (not model.documentDescriptionVisible )
+                 (column [spacing 8, height (px 500), scrollbarY] (
+                 List.map (summary (Maybe.map Problem.deAugment model.currentProblem)) (List.reverse model.editorModel.problemList)))
             ]
             , el [Font.size 12, Font.italic, paddingXY 0 12](outputDisplay model)
             , row [alignBottom, spacing 18] [el [alignBottom] (View.Common.toggleAppMode model.appMode)
 
                   ]
         ]
+
+
+
+summary : Maybe Problem -> Problem -> Element Msg
+summary mproblem problem =
+    let
+      fontColor = if mproblem == Just problem then
+                     Element.rgb 0.8 0 0
+                  else
+                     Element.rgb 0 0 0
+
+    in
+    row [spacing 12] [
+         el [Font.size 12, Font.color fontColor, Font.bold, width (px 20)] (
+           el [alignRight] (text <| (idToString problem.id)))
+       , el [Font.size 14, Font.color fontColor] (text <| String.trim problem.title)
+       ]
+
+idToString : Maybe (List Int) -> String
+idToString mis =
+    case mis of
+        Nothing -> ""
+        Just is -> is |> List.map String.fromInt |> String.join "."
+
 
 renderedSource : Int -> String -> Element Msg
 renderedSource counter sourceText =

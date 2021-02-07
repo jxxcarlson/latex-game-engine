@@ -1,5 +1,5 @@
 module Problem exposing (AugmentedProblem, setCompleted, Header,
-   numberOfCompletedProblems, numberOfProblems,
+   numberOfCompletedProblems, numberOfProblems, deAugment,
    problemListToString, findById, rootProblem
    , Id, Op(..), toZipper, firstChild, forward, backward)
 
@@ -37,6 +37,15 @@ augmentProblem p = {
      , comment  = p.comment
      , completed = False
      }
+deAugment : AugmentedProblem -> Problem
+deAugment p = {
+       title = p.title
+     , id  = p.id
+     , target  = p.target
+     , hint  = p.hint
+     , comment  = p.comment
+     }
+
 
 
 
