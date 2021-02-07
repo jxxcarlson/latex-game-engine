@@ -8,9 +8,10 @@ import Editor exposing(EditorModel)
 
 type alias Model =
     { input : String
-    , output : String
+    , message : String
     , fileContents : Maybe String
     , documentDescription : Maybe DocumentDescription
+    , documentDescriptionVisible : Bool
     , problems : Zipper AugmentedProblem
     , currentProblem : Maybe AugmentedProblem
     , solution: String

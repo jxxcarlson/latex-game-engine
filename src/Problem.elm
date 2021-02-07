@@ -1,6 +1,7 @@
 module Problem exposing (AugmentedProblem, setCompleted, Header,
    numberOfCompletedProblems, numberOfProblems,
-   problemListToString, findById, Id, Op(..), toZipper, firstChild, forward, backward)
+   problemListToString, findById, rootProblem
+   , Id, Op(..), toZipper, firstChild, forward, backward)
 
 import DocParser exposing(Problem)
 import HTree
@@ -24,6 +25,8 @@ type alias Header = {
     , date : String
     , description : String
   }
+
+
 
 augmentProblem : Problem -> AugmentedProblem
 augmentProblem p = {
@@ -82,7 +85,6 @@ problemToString problem =
    , fieldToString "target" problem.target
    , fieldToString "hint" problem.hint
    , fieldToString "comment" problem.comment] |> String.join "\n"
-
 idToString :Maybe (List Int) -> String
 idToString mis =
     case mis of
@@ -91,7 +93,7 @@ idToString mis =
 
 fieldToString : String -> String -> String
 fieldToString name value =
-    name ++ ":" ++ value ++ "\n---"
+    name ++ ":" ++ String.trim value ++ "\n---"
 
 toZipper : List Problem -> Zipper AugmentedProblem
 toZipper problems =

@@ -20,6 +20,9 @@ import View.Standard as Standard
 import View.Editor as Editor
 import Model exposing(Model, AppMode(..))
 import Editor exposing(EditorModel, EditorMsg(..))
+import Tree.Zipper as Zipper
+import Tree
+import Problem
 
 main =
     Browser.element
@@ -40,19 +43,23 @@ type alias Flags =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
-      (documentDescription, zipper) = load Config.initialDocumentText |> Debug.log "INIT"
+      data : { desc : DocumentDescription, problems : List Problem, zipper : Zipper AugmentedProblem }
+      data = case load Config.initialDocumentText of
+          Ok data_ -> data_
+          Err _ -> {desc = DocParser.errorDescription, problems = [], zipper = Zipper.fromTree (Tree.singleton Problem.rootProblem)}
     in
     ( { input = "App started"
-      , output = "App started"
+      , message = "App started"
       , fileContents = Nothing
-      , documentDescription = documentDescription
-      , problems = zipper
-      , currentProblem =  Just (Zipper.label zipper)
+      , documentDescription = Just data.desc
+      , documentDescriptionVisible = True
+      , problems = data.zipper
+      , currentProblem =  Just (Zipper.label data.zipper)
       , solution = Config.initialSolutionText
       , seed = flags.seed
       , counter = 0
       , showInfo = False
-      , numberOfProblems  = Problem.numberOfProblems zipper
+      , numberOfProblems  = Problem.numberOfProblems data.zipper
       , numberOfProblemsCompleted = 0
       , appMode = StandardMode
       , editorModel = Editor.initModel
@@ -76,10 +83,10 @@ update msg model =
         MarkdownMsg _ -> ( model, Cmd.none )
 
         InputText str ->
-            ( { model | input = str, output = str }, Cmd.none )
+            ( { model | input = str, message = str }, Cmd.none )
 
         ReverseText ->
-            ( { model | output = model.output |> String.reverse |> String.toLower }, Cmd.none )
+            ( { model | message = model.message |> String.reverse |> String.toLower }, Cmd.none )
 
         ProblemsRequested ->
               ( model
@@ -93,17 +100,25 @@ update msg model =
 
         ProblemsLoaded content ->
             case load (Utility.removeComments content) of
-                (Nothing, _) -> (model, Cmd.none)
-                (documentDescription, zipper) ->
+                Err message -> ({model | message = message}, Cmd.none)
+                Ok data ->
+                    let
+                      oldEditorModel = model.editorModel
+                      newEditorModel =
+                         {oldEditorModel | problemList = List.reverse data.problems}
+                           |> addDocumentDescription (Just data.desc)
+                    in
                       ( { model | fileContents = Just content
-                           , documentDescription = documentDescription
-                           , problems = zipper
-                           , currentProblem = Just <| Zipper.label zipper
-                           , output =  fileStatus (Just content)
+                           , documentDescription = Just data.desc
+                           , documentDescriptionVisible = True
+                           , problems = data.zipper
+                           , currentProblem = Just <| Zipper.label data.zipper
+                           , message =  fileStatus (Just content)
                            , solution =  "nothing yet"
                            , counter = model.counter + 1
-                           , numberOfProblems = Problem.numberOfProblems zipper
+                           , numberOfProblems = Problem.numberOfProblems data.zipper
                            , numberOfProblemsCompleted = 0
+                           , editorModel = newEditorModel
                         }
                       , Cmd.none
                       )
@@ -123,6 +138,7 @@ update msg model =
                     , solution = ""
                     , counter = model.counter + 1
                     , showInfo = False
+                    , documentDescriptionVisible = False
                     , currentProblem = Just <| Zipper.label zipper}
                     , Cmd.none)
 
@@ -201,14 +217,21 @@ fileStatus mstr =
         Just stuff -> String.fromInt (String.length stuff) ++ " bytes read"
 
 
-load : String -> (Maybe DocumentDescription, Zipper AugmentedProblem)
+load : String -> Result String { desc: DocumentDescription, problems: List Problem, zipper: Zipper AugmentedProblem}
 load input =
-    let
-          (documentDescription, problems_) =
-             case DocParser.parseDocument input of
-                Nothing -> (Nothing, [])
-                Just (desc, probs) -> (Just desc, probs)
+    case DocParser.parseDocument input of
+        Ok (documentDescription, problems_) ->
+            Ok { desc = documentDescription, problems = problems_, zipper = Problem.toZipper problems_}
+        Err _ -> Err "Error parsing document"
 
-          zipper = Problem.toZipper problems_
-    in
-      (documentDescription, zipper)
+
+addDocumentDescription : Maybe DocumentDescription -> EditorModel -> EditorModel
+addDocumentDescription mdesc editorModel =
+  case mdesc of
+      Nothing -> editorModel
+      Just desc ->
+         {editorModel | docTitle = desc.title
+                      , date = desc.date
+                      , author = desc.author
+                      , description = desc.description
+        }

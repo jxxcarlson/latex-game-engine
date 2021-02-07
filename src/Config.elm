@@ -1,7 +1,9 @@
 module Config exposing (..)
 
 paneHeight : Int
-paneHeight = 150
+paneHeight = 120
+
+panelWidth = 540
 
 appWidth = 900
 

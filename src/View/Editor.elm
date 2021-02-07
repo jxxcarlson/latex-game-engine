@@ -61,11 +61,17 @@ showIf show element =
 rhs : EditorModel -> Element EditorMsg
 rhs model =
     column rhsColumnStyle
-        [ column [  spacing 6 ]
+        [ column [  spacing 12 ]
             [
-              text model.docTitle
-              , el [Font.size 14] (text <| "Problems: " ++ (String.fromInt (List.length model.problemList)))
-              , column [spacing 8] (List.map summary model.problemList)
+             column [spacing 6] [
+                    text model.docTitle
+                  , el [Font.size 14] (text model.author)
+                  , el [Font.size 14] (text model.date)
+                 ]
+             , column [spacing 8] [
+                    el [Font.size 14, Font.bold] (text <| "Problems: " ++ (String.fromInt (List.length model.problemList)))
+                  , column [spacing 8, height (px 500), scrollbarY] (List.map summary model.problemList)
+              ]
 
             ]
            , row [alignBottom, spacing 12] [saveProblems, goToStandardView]
@@ -73,8 +79,14 @@ rhs model =
 
 summary : Problem -> Element EditorMsg
 summary problem =
-    el [Font.size 14] (text problem.title)
+    el [Font.size 14] (text <| (idToString problem.id) ++ " " ++ problem.title)
 
+
+idToString : Maybe (List Int) -> String
+idToString mis =
+    case mis of
+        Nothing -> ""
+        Just is -> is |> List.map String.fromInt |> String.join "."
 
 -- BUTTONS
 
@@ -211,19 +223,21 @@ inputTarget model =
 inputHint : EditorModel -> Element EditorMsg
 inputHint model =
    el [moveLeft 5]
-     (Input.text textAreaStyle
+     (Input.multiline textAreaStyle
          { onChange = AcceptHint
          , text = model.hint
          , placeholder = Nothing
          , label = Input.labelAbove [] <| el [] (text "hint")
+         , spellcheck = False
          })
 
 inputComment : EditorModel -> Element EditorMsg
 inputComment model =
    el [moveLeft 5]
-     (Input.text textAreaStyle
+     (Input.multiline textAreaStyle
          { onChange = AcceptComment
          , text = model.comment
          , placeholder = Nothing
          , label = Input.labelAbove [] <| el [] (text "comment")
+         , spellcheck = False
          })

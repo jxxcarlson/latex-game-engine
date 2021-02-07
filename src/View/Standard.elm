@@ -47,6 +47,7 @@ lhs model =
                , showScore model
 
                ]
+             , showComment model.seed model.currentProblem
 
             , View.Common.showIf model.showInfo <| showHint model.seed model.currentProblem
             ]
@@ -94,9 +95,8 @@ rhs model =
                 el [Font.bold, Font.size 24] (text (Maybe.map .title model.documentDescription |> Maybe.withDefault "Exercises"))
                , el [Font.bold, Font.size 14] (text (Maybe.map .author model.documentDescription |> Maybe.withDefault "Exercises"))
                , el [Font.bold, Font.size 14] (text (Maybe.map .date model.documentDescription |> Maybe.withDefault "Exercises"))
-               , renderedSource model.counter (Maybe.map .description model.documentDescription |>  Maybe.withDefault "Exercises")
-               , showComment model.seed model.currentProblem
-
+               , View.Common.showIf model.documentDescriptionVisible
+                  (renderedSource model.counter (Maybe.map .description model.documentDescription |>  Maybe.withDefault "Exercises"))
 
             ]
             , row [alignBottom, spacing 18] [el [alignBottom] (View.Common.toggleAppMode model.appMode)
@@ -129,9 +129,9 @@ showComment seed mprob =
         Just prob ->
             if String.length prob.comment < 3  then Element.none
             else
-                column[width (px 380) ] [
+                column[ ] [
                        el [Font.size 14, Font.bold, moveRight 8] (text "Comment")
-                     , column [Font.size 13, width (px 380), padding 10] [renderMath seed commentStyle prob.comment]
+                     , column [Font.size 13, padding 10] [renderMath seed (commentStyle Config.panelWidth) prob.comment]
                      ]
 
 
@@ -202,7 +202,7 @@ heading1 str =
 outputDisplay : Model -> Element msg
 outputDisplay model =
     row [ spacing 12]
-        [ text model.output, text <| "Problems loaded"] -- ++ String.fromInt (List.length model.problems) ]
+        [ text model.message]
 
 
 inputText : Model -> Element Msg

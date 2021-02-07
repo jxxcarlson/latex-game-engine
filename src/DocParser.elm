@@ -18,6 +18,15 @@ type alias DocumentDescription = {
      , description :String
   }
 
+errorDescription : DocumentDescription
+errorDescription = {
+    title = "Error"
+  , author = "Nobody"
+  , date = ""
+  , description = "There is an error in Config.initialDocument"
+  }
+
+
 type alias KVRecord = List KV
 
 type alias KV = {key: String, value: Value}
@@ -38,11 +47,9 @@ problems input =
        Err _ -> []
 
 
-parseDocument : String -> Maybe (DocumentDescription, List Problem)
+parseDocument : String -> Result (List DeadEnd) (DocumentDescription, List Problem)
 parseDocument input =
-    case run documentParser input of
-        Ok (desc, probs_) -> Just (desc, probs_)
-        Err _ -> Nothing
+    run documentParser input
 
 documentParser : Parser (DocumentDescription, List Problem)
 documentParser =
