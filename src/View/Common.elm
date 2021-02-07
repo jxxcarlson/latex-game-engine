@@ -9,6 +9,12 @@ import Msg exposing(..)
 import Model exposing(Model, AppMode(..))
 
 
+showIf : Bool -> Element Msg -> Element Msg
+showIf show element =
+    if show then  element else Element.none
+
+
+
 toggleAppMode : AppMode -> Element Msg
 toggleAppMode appMode =
     let

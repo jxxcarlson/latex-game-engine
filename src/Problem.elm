@@ -1,4 +1,4 @@
-module Problem exposing (AugmentedProblem, setCompleted,
+module Problem exposing (AugmentedProblem, setCompleted, Header,
    numberOfCompletedProblems, numberOfProblems,
    problemListToString, findById, Id, Op(..), toZipper, firstChild, forward, backward)
 
@@ -18,6 +18,12 @@ type alias AugmentedProblem = {
     , completed : Bool
     }
 
+type alias Header = {
+      docTitle : String
+    , author : String
+    , date : String
+    , description : String
+  }
 
 augmentProblem : Problem -> AugmentedProblem
 augmentProblem p = {
@@ -53,10 +59,21 @@ level prob =
         Just id_ -> List.length id_
 
 
-problemListToString : List Problem -> String
-problemListToString problems =
-    List.map problemToString problems
-      |> String.join "\n\n"
+problemListToString : Header -> List Problem -> String
+problemListToString header problems =
+   headerToString header
+   ++ "\n\n"
+   ++ (List.map problemToString problems |> String.join "\n\n")
+
+
+headerToString : Header -> String
+headerToString header =
+    [ fieldToString "title" header.docTitle
+   , fieldToString "author" header.author
+   , fieldToString "date" header.date
+   , fieldToString "description" header.description
+   ] |> String.join "\n"
+
 
 problemToString : Problem -> String
 problemToString problem =

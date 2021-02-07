@@ -48,7 +48,7 @@ lhs model =
 
                ]
 
-            , showIf model.showInfo <| showHint model.seed model.currentProblem
+            , View.Common.showIf model.showInfo <| showHint model.seed model.currentProblem
             ]
         ]
 
@@ -113,9 +113,6 @@ renderedSource counter sourceText =
 
 
 
-showIf : Bool -> Element Msg -> Element Msg
-showIf show element =
-    if show then  element else Element.none
 
 showHint : Int -> Maybe AugmentedProblem -> Element Msg
 showHint seed mprob =

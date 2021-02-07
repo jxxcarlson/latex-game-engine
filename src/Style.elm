@@ -41,6 +41,13 @@ buttonStyle =
     , paddingXY 15 8
     ]
 
+
+selectedButtonStyle =
+    [ Background.color (rgb255 160 40 40)
+    , Font.color (rgb255 255 255 255)
+    , paddingXY 15 8
+    ]
+
 hintStyle = [  HA.style "background-color" "white"
              , HA.style "width" "540px"
              , HA.style "margin-left" "-8px"

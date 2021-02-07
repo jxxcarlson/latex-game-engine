@@ -3,11 +3,12 @@ module Editor exposing (..)
 import DocParser exposing(Problem)
 import Maybe.Extra
 import File.Download as Download
-import Problem
+import Problem exposing(Header)
 
 
 type alias EditorModel = {
-          problemList : List Problem
+          editorMode : EditorMode
+          , problemList : List Problem
         -- INPUT, HEADER
          , docTitle : String
         , author : String
@@ -21,6 +22,8 @@ type alias EditorModel = {
         , comment : String
      }
 
+type EditorMode = ProblemMode | HeaderMode
+
 init : ( EditorModel, Cmd EditorMsg )
 init  = ( initModel, Cmd.none )
 
@@ -32,8 +35,13 @@ type EditorMsg =
   | AcceptTarget String
   | AcceptHint String
   | AcceptComment String
+  | AcceptDocTitle String
+  | AcceptAuthor String
+  | AcceptDate String
+  | AcceptDescription String
   | AddProblem
   | SaveProblems
+  | SetMode EditorMode
 
 initModel : EditorModel
 initModel = {
@@ -49,6 +57,7 @@ initModel = {
      , target = ""
      , hint  = ""
      , comment = ""
+     , editorMode = ProblemMode
      }
 
 clearProblem model = { model |
@@ -69,10 +78,26 @@ update msg model =
         AcceptTarget t -> ({model | target = t}, Cmd.none)
         AcceptHint h -> ({model | hint = h}, Cmd.none)
         AcceptComment c -> ({model | comment = c}, Cmd.none)
+        AcceptDocTitle t -> ({model | docTitle = t}, Cmd.none)
+        AcceptAuthor a -> ({model | author = a}, Cmd.none)
+        AcceptDate d -> ({model | date = d}, Cmd.none)
+        AcceptDescription d -> ({model | description = d}, Cmd.none)
         AddProblem ->
             (
               clearProblem { model | problemList = makeProblem model :: model.problemList}, Cmd.none)
-        SaveProblems -> (model, download (Problem.problemListToString (List.reverse model.problemList)))
+        SaveProblems -> (model, download (Problem.problemListToString (getHeader model) (List.reverse model.problemList)))
+        SetMode editorMode ->
+            ({ model | editorMode = editorMode}, Cmd.none)
+
+getHeader : EditorModel -> Header
+getHeader model =
+    {
+      docTitle = model.docTitle
+    , author = model.author
+    , date = model.date
+    , description = model.description
+
+    }
 
 download : String -> Cmd msg
 download problemString =
