@@ -18,7 +18,6 @@ type alias EditorModel = {
         , title : String
         , id : String
         , target : String
-        , hint : String
         , comment : String
      }
 
@@ -33,7 +32,6 @@ type EditorMsg =
   | AcceptTitle String
   | AcceptId String
   | AcceptTarget String
-  | AcceptHint String
   | AcceptComment String
   | AcceptDocTitle String
   | AcceptAuthor String
@@ -55,7 +53,6 @@ initModel = {
      , title  = ""
      , id = ""
      , target = ""
-     , hint  = ""
      , comment = ""
      , editorMode = ProblemMode
      }
@@ -64,7 +61,6 @@ clearProblem model = { model |
        title  = ""
      , id = ""
      , target = ""
-     , hint  = ""
      , comment = ""
      }
 
@@ -76,7 +72,6 @@ update msg model =
         AcceptTitle t -> ({model | title = t}, Cmd.none)
         AcceptId id -> ({model | id = id}, Cmd.none)
         AcceptTarget t -> ({model | target = t}, Cmd.none)
-        AcceptHint h -> ({model | hint = h}, Cmd.none)
         AcceptComment c -> ({model | comment = c}, Cmd.none)
         AcceptDocTitle t -> ({model | docTitle = t}, Cmd.none)
         AcceptAuthor a -> ({model | author = a}, Cmd.none)
@@ -110,7 +105,6 @@ makeProblem model =
        title  = model.title
      , id = Just (makeId model.id)
      , target = model.target
-     , hint  = model.hint
      , comment = model.comment
 
     }

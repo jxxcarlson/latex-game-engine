@@ -52,7 +52,6 @@ lhs model =
                ]
             , viewComment model.seed model.currentProblem
 
-            , View.Common.showIf model.showInfo <| showHint model.seed model.currentProblem
             , row [spacing 12] [loadButton, urlInput model]
             ]
         ]
@@ -144,14 +143,6 @@ renderedSource counter sourceText =
         [ ( String.fromInt counter, Markdown.Render.toHtml ExtendedMath sourceText |> Html.map MarkdownMsg ) ]
         ) |> Element.html
 
-
-showHint : Int -> Maybe AugmentedProblem -> Element Msg
-showHint seed mprob =
-    case mprob of
-        Nothing -> Element.none
-        Just prob -> column[width (px 600) ] [
-              column [Font.size 13, width (px 580), padding 10] [renderMath seed hintStyle prob.hint]
-             ]
 
 viewComment : Int -> Maybe AugmentedProblem -> Element Msg
 viewComment seed mprob =

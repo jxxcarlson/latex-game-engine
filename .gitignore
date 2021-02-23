@@ -2,3 +2,5 @@ elm-stuff/
 .idea/
 public/Main.js
 .gradle/
+public/Main.min.js
+archivy/**/*

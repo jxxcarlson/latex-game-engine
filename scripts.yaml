@@ -8,6 +8,8 @@ scripts:
 
   go: open -a /Applications/Firefox.app/ http://localhost:4507/
 
+  remobe: open -a /Applications/Firefox.app/ http://jxxcarlson.github.io/app/
+
   live: elm-live src/Main.elm --open --start-page=public/index.html -- --output=public/Main.js
 
   cloc: cloc --by-file src

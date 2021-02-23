@@ -14,7 +14,6 @@ type alias AugmentedProblem = {
       title : String
     , id : Maybe (List Int)
     , target : String
-    , hint : String
     , comment : String
     , completed : Bool
     }
@@ -33,7 +32,6 @@ augmentProblem p = {
        title = p.title
      , id  = p.id
      , target  = p.target
-     , hint  = p.hint
      , comment  = p.comment
      , completed = False
      }
@@ -42,7 +40,6 @@ deAugment p = {
        title = p.title
      , id  = p.id
      , target  = p.target
-     , hint  = p.hint
      , comment  = p.comment
      }
 
@@ -53,7 +50,6 @@ rootProblem = {
       title = "root"
     , id = Just []
     , target = ""
-    , hint  = ""
     , comment = ""
     , completed = False
     }
@@ -92,7 +88,6 @@ problemToString problem =
     [ fieldToString "title" problem.title
    , idToString problem.id
    , fieldToString "target" problem.target
-   , fieldToString "hint" problem.hint
    , fieldToString "comment" problem.comment] |> String.join "\n"
 idToString :Maybe (List Int) -> String
 idToString mis =

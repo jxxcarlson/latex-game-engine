@@ -7,7 +7,6 @@ type alias Problem = {
       title : String
     , id : Maybe (List Int)
     , target : String
-    , hint : String
     , comment : String
     }
 
@@ -105,7 +104,6 @@ problemParser =
     |= kvSParser_ "title"
     |= (kvSParser_ "id" |> map parseId)
     |= kvSParser_ "target"
-    |= kvSParser_ "hint"
     |= kvSParser_ "comment"
 
 parseId : String -> Maybe (List Int)

@@ -44,7 +44,6 @@ lhsProblem model =
                inputTitle model
              , inputId model
              , inputTarget model
-             , inputHint model
              , inputComment model
              , row [spacing 36] [
                   row [spacing 12] [problemMode model, headerMode model]
@@ -220,16 +219,6 @@ inputTarget model =
             , spellcheck = False
             })
 
-inputHint : EditorModel -> Element EditorMsg
-inputHint model =
-   el [moveLeft 5]
-     (Input.multiline textAreaStyle
-         { onChange = AcceptHint
-         , text = model.hint
-         , placeholder = Nothing
-         , label = Input.labelAbove [] <| el [] (text "hint")
-         , spellcheck = False
-         })
 
 inputComment : EditorModel -> Element EditorMsg
 inputComment model =
