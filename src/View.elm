@@ -1,4 +1,4 @@
-module View.Standard exposing (view)
+module View exposing (view)
 
 import Html exposing (Html)
 import Html.Keyed as Keyed
@@ -44,8 +44,6 @@ lhs model =
                    , nextButton
                   ]
                , el [centerX] ( okButton)
-               --,el [] (toggleInfo model.showInfo)
-               -- , showStatus model.currentProblem
                , el [alignRight] (showScore model)
 
                ]
@@ -65,15 +63,6 @@ showScore model =
     in
      el [Font.size 18, Font.bold ](text <| completed ++ "/" ++ all)
 
-showStatus : Maybe AugmentedProblem -> Element Msg
-showStatus mprob =
-    case mprob of
-        Nothing -> Element.none
-        Just prob ->
-            let
-               msg =  if prob.completed then "YES" else "NO"
-            in
-              el [Font.size 14] (text ("Complete: " ++ msg))
 
 
 mainTitle :  Element Msg
@@ -107,7 +96,6 @@ rhs model =
                , column [spacing 8, height (px 360), width (px 320), scrollbarY] (
                   List.map (summary  model.currentProblem) (model.problemList))
             ]
-            -- , row [alignBottom, spacing 18] [el [alignBottom] (View.Common.toggleAppMode model.appMode) ]
             , row [moveDown 5 , alignBottom, Font.size 12, Font.italic] [el [alignBottom] (outputDisplay model) ]
 
 
@@ -227,10 +215,6 @@ mathNode k element =
 
 -- UI
 
-title : String -> Element msg
-title str =
-    row [  width (px Config.appWidth), Font.size 24, Font.color (gray 240), paddingXY 0 8 ] [ text str ]
-
 heading : String -> Element msg
 heading str =
     row [  Font.size 16, Font.italic, paddingEach {top = 12, bottom = 0, left = 0, right = 0} ] [ text str ]
@@ -245,17 +229,6 @@ outputDisplay model =
     row [ spacing 12]
         [ text model.message]
 
-
-inputText : Model -> Element Msg
-inputText model =
-    el [moveLeft 5]
-        (Input.text []
-            { onChange = InputText
-            , text = model.input
-            , placeholder = Nothing
-            , label = Input.labelLeft [] <| el [] (text "")
-            })
-
 -- BUTTONS & FIELDS
 
 urlInput : Model -> Element Msg 
@@ -266,18 +239,6 @@ urlInput model =
      , placeholder = Nothing
      , label = Input.labelHidden "Enter Github URL"
      }
-
-toggleInfo : Bool -> Element Msg
-toggleInfo showInfo =
-    let
-        label = if showInfo then "Hide hint" else "Show hint"
-    in
-    row [ ]
-        [ Input.button buttonStyle
-            { onPress = Just ToggleInfo
-            , label = el labelStyle (text label)
-            }
-        ]
 
 
 loadButton : Element Msg
@@ -292,7 +253,7 @@ okButton : Element Msg
 okButton =
     row [ ]
         [ Input.button buttonStyle
-            { onPress = Just OK
+            { onPress = Just SolutionIsOK
             , label = el labelStyle(text "I think it is correct")
             }
         ]

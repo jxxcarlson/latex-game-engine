@@ -1,6 +1,5 @@
 module Style exposing (..)
 
-
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
@@ -8,7 +7,6 @@ import Html.Attributes as HA
 import Html exposing (Html)
 import Config
 
--- STYLE
 
 gray g = rgb255 g g g
 
@@ -43,48 +41,11 @@ buttonStyle =
     ]
 
 
-selectedButtonStyle =
-    [ Background.color (rgb255 160 40 40)
-    , Font.color (rgb255 255 255 255)
-    , paddingXY 15 8
-    ]
-
-hintStyle = [  HA.style "background-color" "white"
-             , HA.style "width" "540px"
-             , HA.style "margin-left" "-8px"
-             , HA.style "padding-top" "1px"
-             , HA.style "padding-bottom" "1px"
-             , HA.style "padding-left" "9px"
-             , HA.style "padding-right" "8px"
-             ]
-
 commentStyle w h = [  HA.style "background-color" "white"
              , HA.style "width" (String.fromInt w ++ "px")
              , HA.style "height" (String.fromInt h ++ "px")
-            --  , HA.style "margin-top" "0px"
-            --  , HA.style "margin-left" "-8px"
-            --  , HA.style "padding-top" "2px"
-            --  , HA.style "padding-bottom" "2px"
-             --, HA.style "padding-left" "10x"
-             --, HA.style "padding-right" "10px"
              , HA.style "white-space" "pre-wrap"
-             , HA.style "line-height" "1.35"
-             ]
-
-
-commentStyle1 w h = [  HA.style "background-color" "white"
-             , HA.style "width" (String.fromInt w ++ "px")
-             , HA.style "height" (String.fromInt h ++ "px")
-             , HA.style "margin-top" "0px"
-             , HA.style "margin-left" "-8px"
-             , HA.style "padding-top" "2px"
-             , HA.style "padding-bottom" "2px"
-             , HA.style "padding-left" "21x"
-             , HA.style "padding-right" "21px"
-             , HA.style "white-space" "pre-wrap"
-             , HA.style "line-height" "1.35"
-             ]
-
+             , HA.style "line-height" "1.35"]
 
 renderedSourceStyle : List (Html.Attribute msg)
 renderedSourceStyle =

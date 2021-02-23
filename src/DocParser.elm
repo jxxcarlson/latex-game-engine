@@ -1,7 +1,6 @@
 module DocParser exposing(..)
 
 import Parser exposing(..)
-import ParserTools as PT
 
 type alias Problem = {
       title : String
@@ -96,7 +95,7 @@ documentParser =
 --     : Result (List DeadEnd) (List Problem)
 problemListParser : Parser (List Problem)
 problemListParser =
-  PT.sepBy spaces problemParser
+  sepBy spaces problemParser
 
 problemParser : Parser Problem
 problemParser = 
@@ -108,7 +107,7 @@ problemParser =
 
 parseId : String -> Maybe (List Int)
 parseId input = 
-  case run (PT.sepBy (symbol ":") int) (String.replace "." ":" (String.trim input)) of 
+  case run (sepBy (symbol ":") int) (String.replace "." ":" (String.trim input)) of
     Ok list -> Just list 
     Err _ -> Nothing
 
@@ -130,105 +129,20 @@ kvSParser_ key =
    |. spaces
 
 
--- FOR TESTING
+
+sepBy : Parser () -> Parser a -> Parser (List a)
+sepBy sep p =
+    loop [] (sepByHelp sep p)
 
 
-doc = head ++ "\n\n" ++ probs
+sepByHelp : Parser () -> Parser a -> List a -> Parser (Step (List a) (List a))
+sepByHelp sep p vs =
+    oneOf
+        [ succeed (\v -> Loop (v :: vs))
+            |= p
+            |. oneOf [ sep, succeed () ]
+        , succeed ()
+            |> map (\_ -> Done (List.reverse vs))
+        ]
 
-head = """title:Calculus
----
-author: James Carlson
----
-date: 2 Feb 2021
----
-description:
-We assume that you have learned about
-subscripts and superscripts.  In this
-lesson you will learn how to write common
-expressions in Calculus: derivaties,
-integrals, etc.
----
-"""
 
-prob = """title: Integration
----
-id: 1.1.1
----
-@target
-$$
-\\int x^n dx
-$$
----
-@hint
-Use '\\int' for the integral sign
----
-comment: This is for starters
----
-
-"""
-
-prob2 = """title: Integration
----
-id: 1.1.1
----
-target:
-$$
-\\int x^n dx
-$$
----
-hint:
-Use '\\int' for the integral sign
----
-comment: This is for starters
---
-
-"""
-
-prob3 = """
-title:Symbols
----
-id:1
----
-target: $\\alpha + \\beta + \\gamma = \\pi$
-hint:
----
-comment: Enclose your formula with dollar signs: \\dollar ... \\dollar.
-Use \\bs{alpha} for $\\alpha$, and so on.
----
-"""
-
-probs = """title: Integration
----
-id: 1.1.1
----
-next: 1.1.2
----
-@target
-$$
-\\int x^n dx
-$$
----
-@hint
-Use '\\int' for the integral sign
----
-comment: This is for starters
----
-===
-title: Integration
----
-id: 1.1.2
----
-next: 1.1.3
----
-@target
-$$
-\\int_0^1 x^n dx
-$$
----
-@hint
-You know all you need to know for this one!
----
-comment: You are getting better!
----
-===
-"""

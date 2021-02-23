@@ -1,4 +1,4 @@
-module Strings exposing (..)
+module Strings exposing (initialDocument)
 
 
 initialDocument = """title:Simple formulas

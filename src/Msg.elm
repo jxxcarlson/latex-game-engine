@@ -11,11 +11,11 @@ type Msg
     | LaTeXMsg MiniLatex.EditSimple.LaTeXMsg
     | MarkdownMsg Markdown.Render.MarkdownMsg
     | NewSeed Int
+    | AcceptUrl String
+    | GetLesson
+    | GotLesson (Result Http.Error String)
     | GetSolution String
     | NextProblem
     | PrevProblem
-    | OK
-    | ToggleInfo
-    | GotLesson (Result Http.Error String)
-    | GetLesson
-    | AcceptUrl String
+    | SolutionIsOK
+

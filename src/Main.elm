@@ -6,15 +6,12 @@ import Html exposing (Html)
 import Element exposing (..)
 import Element.Background as Background
 import Problem exposing(Id, Op(..), AugmentedProblem)
-import Task
 import DocParser exposing(Problem, DocumentDescription)
-import Config
 import Random
 import Style exposing(..)
-import Utility
 import Tree.Zipper as Zipper exposing(Zipper)
 import Msg exposing(..)
-import View.Standard as Standard
+import View
 import Model exposing(Model)
 import Http
 import Tree.Zipper as Zipper
@@ -122,7 +119,7 @@ update msg model =
                     , showInfo = False
                     , currentProblem = Just <| Zipper.label zipper}, Cmd.none)
 
-        OK ->
+        SolutionIsOK ->
             case model.currentProblem of
                 Nothing -> ({model |showInfo = False} , Cmd.none)
                 Just prob ->
@@ -139,7 +136,6 @@ update msg model =
                              }
                             , Cmd.none)
 
-        ToggleInfo -> ({model | showInfo = not model.showInfo}, Cmd.none)
 
 
 view : Model -> Html Msg
@@ -149,13 +145,13 @@ view model =
        (mainView model)
 
 mainView model =
-    Standard.view model
+    View.view model
 
 
 -- HELPERS
 
 loadLesson model content =
-    case load (Utility.removeComments content) of
+    case load (removeComments content) of
         Err message -> ({model | message = message}, Cmd.none)
         Ok data ->
                 ( { model | fileContents = Just content
@@ -172,6 +168,13 @@ loadLesson model content =
                 , Cmd.none
                 )
 
+removeComments : String -> String
+removeComments str =
+   str
+     |> String.lines
+     |> List.filter (\l -> String.left 1 l /= "#")
+     |> String.join "\n"
+
 getLesson: String -> Cmd Msg
 getLesson url =
   Http.get
@@ -179,17 +182,6 @@ getLesson url =
     , expect = Http.expectString GotLesson
     }
 
-getLesson1 : String -> Cmd Msg
-getLesson1 url =
-  Http.riskyRequest
-    { method = "GET"
-    , headers = [Http.header "Access-Control-Allow-Origin" "*"]
-    , url = url
-    , body = Http.emptyBody
-    , expect = Http.expectString GotLesson
-    , timeout = Nothing
-    , tracker = Nothing
-    }
 
 noFocus : Element.FocusStyle
 noFocus =
@@ -213,14 +205,3 @@ load input =
             Ok { desc = documentDescription, problems = problems_, zipper = Problem.toZipper problems_}
         Err err -> Err ("Errors: " ++ err)
 
-
--- addDocumentDescription : Maybe DocumentDescription -> EditorModel -> EditorModel
--- addDocumentDescription mdesc editorModel =
---   case mdesc of
---       Nothing -> editorModel
---       Just desc ->
---          {editorModel | docTitle = desc.title
---                       , date = desc.date
---                       , author = desc.author
---                       , description = desc.description
---         }

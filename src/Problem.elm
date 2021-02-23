@@ -1,6 +1,6 @@
 module Problem exposing (AugmentedProblem, setCompleted, Header,
    numberOfCompletedProblems, numberOfProblems, deAugment,
-   problemListToString, findById, rootProblem
+    findById, rootProblem
    , Id, Op(..), toZipper, firstChild, forward, backward)
 
 import DocParser exposing(Problem)
@@ -65,13 +65,6 @@ level prob =
     case prob.id of
         Nothing -> -1
         Just id_ -> List.length id_
-
-
-problemListToString : Header -> List Problem -> String
-problemListToString header problems =
-   headerToString header
-   ++ "\n\n"
-   ++ (List.map problemToString problems |> String.join "\n\n")
 
 
 headerToString : Header -> String
