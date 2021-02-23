@@ -52,16 +52,12 @@ init flags =
       , solution = ""
       , seed = flags.seed
       , counter = 0
-      , showInfo = False
       , numberOfProblems  = Problem.numberOfProblems data.zipper
       , numberOfProblemsCompleted = 0
       , url = "jxxcarlson/latex-lessons/master/lesson1"
       }
     , Cmd.none
     )
-
-
-
 
 
 subscriptions model =
@@ -104,7 +100,6 @@ update msg model =
             ({model | problems = zipper
                     , solution = ""
                     , counter = model.counter + 1
-                    , showInfo = False
                     , documentDescriptionVisible = False
                     , currentProblem = Just <| Zipper.label zipper}
                     , Cmd.none)
@@ -116,12 +111,11 @@ update msg model =
             ({model | problems = zipper
                     , solution = ""
                     , counter = model.counter + 1
-                    , showInfo = False
                     , currentProblem = Just <| Zipper.label zipper}, Cmd.none)
 
         SolutionIsOK ->
             case model.currentProblem of
-                Nothing -> ({model |showInfo = False} , Cmd.none)
+                Nothing -> (model , Cmd.none)
                 Just prob ->
                     let
                         zipper1 = Problem.setCompleted True prob model.problems
@@ -130,7 +124,6 @@ update msg model =
                         ({model | problems = zipper2
                                 , solution = ""
                                 , counter = model.counter + 1
-                                , showInfo = False
                                 , currentProblem =  Just (Zipper.label zipper2)
                                 , numberOfProblemsCompleted = Problem.numberOfCompletedProblems zipper2
                              }

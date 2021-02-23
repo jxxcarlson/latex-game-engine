@@ -16,7 +16,6 @@ type alias Model =
     , solution: String
     , seed : Int
     , counter : Int
-    , showInfo : Bool
     , numberOfProblems : Int
     , numberOfProblemsCompleted : Int
     , url : String

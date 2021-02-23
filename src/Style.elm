@@ -13,12 +13,9 @@ gray g = rgb255 g g g
 labelStyle = [ centerX, centerY, Font.size 14]
 
 mainColumnStyle =
-    let
-      g = 200
-    in
     [ centerX
     , centerY
-    , Background.color (rgb255 g g g)
+    , Background.color (gray 200)
     , paddingXY 20 20
     , width (px 600)
     , height (px Config.appHeight)

@@ -74,11 +74,6 @@ documentDescriptionParser =
       |= kvSParser_ "date"
       |= kvSParser_ "description"
 
-problems input =
-   case run problemListParser input of
-       Ok ps -> ps
-       Err _ -> []
-
 
 parseDocument : String -> Result String (DocumentDescription, List Problem)
 parseDocument input =

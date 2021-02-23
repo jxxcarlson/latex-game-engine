@@ -6,8 +6,6 @@ commentPaneHeight = 80
 
 paneWidth = 540
 
-appWidth = 900
-
 appHeight = 750
 
 problemTitle = "Imitate what you see below"
