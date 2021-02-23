@@ -40,29 +40,6 @@ type alias Flags =
     , height : Int
     }
 
- --case load (Utility.removeComments content) of
- --   Err message -> ({model | message = message}, Cmd.none)
- --   Ok data ->
- --       let
- --         oldEditorModel = model.editorModel
- --         newEditorModel =
- --            {oldEditorModel | problemList = List.reverse data.problems}
- --              |> addDocumentDescription (Just data.desc)
- --       in
- --         ( { model | fileContents = Just content
- --              , documentDescription = Just data.desc
- --              , problems = data.zipper
- --              , currentProblem = Just <| Zipper.label data.zipper
- --              , message =  fileStatus (Just content)
- --              , solution =  ""
- --              , counter = model.counter + 1
- --              , numberOfProblems = Problem.numberOfProblems data.zipper
- --              , numberOfProblemsCompleted = 0
- --              , editorModel = newEditorModel
- --           }
- --         , Cmd.none
- --         )
-
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let

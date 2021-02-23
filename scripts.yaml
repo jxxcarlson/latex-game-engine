@@ -8,7 +8,7 @@ scripts:
 
   go: open -a /Applications/Firefox.app/ http://localhost:4507/
 
-  remobe: open -a /Applications/Firefox.app/ http://jxxcarlson.github.io/app/
+  remote: open -a /Applications/Firefox.app/ http://jxxcarlson.github.io/app/latexTutor
 
   live: elm-live src/Main.elm --open --start-page=public/index.html -- --output=public/Main.js
 
@@ -17,19 +17,20 @@ scripts:
   minify: npx uglify-js public/Main.js -mc 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9"' -o public/Main.min.js
 
   publish:
+    # Prepare
     - elm make --optimize src/Main.elm --output=public/Main.js
+    - echo "    uglifying ..."
     - npx uglify-js public/Main.js -mc 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9"' -o public/Main.min.js
-#    - scp public/Main.min.js root@138.197.81.6:/${REMOTE}
-#    - scp public/index-remote.html root@138.197.81.6:/${REMOTE}/index-katex.html
-#    - scp public/assets/elm-katex.js root@138.197.81.6:/${REMOTE}/assets
-#    - scp public/assets/style.css root@138.197.81.6:/${REMOTE}/assets
-#    - echo "published at https://markdown.minilatex.app/"
-
-
-
-  publish-github:
-    - elm make --optimize src/Main.elm --output=public/Main.js
-    - npx uglify-js public/Main.js -mc 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9"' -o public/Main.min.js
+    - sed 's/Main.js/Main.min.js/' public/index.html >public/index-min.html
+    # Copy to first repo
     - cp public/Main.min.js /Users/carlson/dev/jxxcarlson.github.io/app/latexTutor/
-    - cp pubic/Main.min.js /Users/carlson/dev/elm/latex-lessons/
+    - cp public/index-min.html /Users/carlson/dev/jxxcarlson.github.io/app/latexTutor/index.html
+    # Copy to second repo
+    - cp public/Main.min.js /Users/carlson/dev/elm/latex-lessons/app/
+    - cp public/index-min.html /Users/carlson/dev/elm/latex-lessons/app/index.html
+    # Finish up
+    - rm public/index-min.html
+    - echo "    Now push changes from /Users/carlson/dev/jxxcarlson.github.io/app/latexTutor/"
+    - echo "    and /Users/carlson/dev/elm/latex-lessons/"
+    - echo
 

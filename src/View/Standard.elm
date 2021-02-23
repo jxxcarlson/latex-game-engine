@@ -108,8 +108,8 @@ rhs model =
                , column [spacing 8, height (px 360), width (px 320), scrollbarY] (
                   List.map (summary  model.currentProblem) (model.problemList))
             ]
-            , el [Font.size 12, Font.italic, paddingXY 0 24](outputDisplay model)
             -- , row [alignBottom, spacing 18] [el [alignBottom] (View.Common.toggleAppMode model.appMode) ]
+            , row [moveDown 5 , alignBottom, Font.size 12, Font.italic] [el [alignBottom] (outputDisplay model) ]
 
 
         ]
