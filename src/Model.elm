@@ -3,8 +3,6 @@ module Model exposing (..)
 import Problem exposing(Id, Op(..), AugmentedProblem)
 import DocParser exposing(Problem, DocumentDescription)
 import Tree.Zipper as Zipper exposing(Zipper)
-import Editor exposing(EditorModel)
-
 
 type alias Model =
     { input : String
@@ -22,7 +20,6 @@ type alias Model =
     , numberOfProblems : Int
     , numberOfProblemsCompleted : Int
     , appMode : AppMode
-    , editorModel : EditorModel
     , url : String
     }
 

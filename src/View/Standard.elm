@@ -15,7 +15,6 @@ import Markdown.Option exposing (MarkdownOption(..), OutputOption(..))
 import Markdown.Render
 import Msg exposing(..)
 import Model exposing(Model, AppMode(..))
-import View.Common
 
 
 view : Model -> Element Msg

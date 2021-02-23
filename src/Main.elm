@@ -17,9 +17,7 @@ import Utility
 import Tree.Zipper as Zipper exposing(Zipper)
 import Msg exposing(..)
 import View.Standard as Standard
-import View.Editor as Editor
 import Model exposing(Model, AppMode(..))
-import Editor exposing(EditorModel, EditorMsg(..))
 import Http
 import Tree.Zipper as Zipper
 import Tree
@@ -63,7 +61,6 @@ init flags =
       , numberOfProblems  = Problem.numberOfProblems data.zipper
       , numberOfProblemsCompleted = 0
       , appMode = StandardMode
-      , editorModel = Editor.initModel
       , url = "jxxcarlson/latex-lessons/master/lesson1"
       }
     , Cmd.none
@@ -166,23 +163,6 @@ update msg model =
 
         ToggleInfo -> ({model | showInfo = not model.showInfo}, Cmd.none)
 
-        ToggleAppMode ->
-            let
-              newMode = case model.appMode of
-                  StandardMode -> EditMode
-                  EditMode -> StandardMode
-            in
-              ({ model | appMode = newMode}, Cmd.none)
-
-        E editorMsg ->
-          case editorMsg of
-            GoToStandarMode ->
-               ({ model | appMode = StandardMode}, Cmd.none)
-            _ -> let
-                   (newEditorModel, cmd) = Editor.update editorMsg model.editorModel
-                 in
-                   ({model | editorModel = newEditorModel}, cmd |> Cmd.map E)
-
 
 view : Model -> Html Msg
 view model =
@@ -191,9 +171,7 @@ view model =
        (mainView model)
 
 mainView model =
-    case model.appMode of
-        StandardMode -> Standard.view model
-        EditMode -> Editor.view model.editorModel |> Element.map E
+    Standard.view model
 
 
 -- HELPERS
@@ -202,12 +180,6 @@ loadLesson model content =
     case load (Utility.removeComments content) of
         Err message -> ({model | message = message}, Cmd.none)
         Ok data ->
-            let
-                oldEditorModel = model.editorModel
-                newEditorModel =
-                    {oldEditorModel | problemList = List.reverse data.problems}
-                    |> addDocumentDescription (Just data.desc)
-            in
                 ( { model | fileContents = Just content
                     , documentDescription = Just data.desc
                     , problems = data.zipper
@@ -218,7 +190,6 @@ loadLesson model content =
                     , counter = model.counter + 1
                     , numberOfProblems = Problem.numberOfProblems data.zipper
                     , numberOfProblemsCompleted = 0
-                    , editorModel = newEditorModel
                 }
                 , Cmd.none
                 )
@@ -265,13 +236,13 @@ load input =
         Err err -> Err ("Errors: " ++ err)
 
 
-addDocumentDescription : Maybe DocumentDescription -> EditorModel -> EditorModel
-addDocumentDescription mdesc editorModel =
-  case mdesc of
-      Nothing -> editorModel
-      Just desc ->
-         {editorModel | docTitle = desc.title
-                      , date = desc.date
-                      , author = desc.author
-                      , description = desc.description
-        }
+-- addDocumentDescription : Maybe DocumentDescription -> EditorModel -> EditorModel
+-- addDocumentDescription mdesc editorModel =
+--   case mdesc of
+--       Nothing -> editorModel
+--       Just desc ->
+--          {editorModel | docTitle = desc.title
+--                       , date = desc.date
+--                       , author = desc.author
+--                       , description = desc.description
+--         }

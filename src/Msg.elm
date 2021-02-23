@@ -3,7 +3,6 @@ module Msg exposing (..)
 import MiniLatex.EditSimple
 import Markdown.Render
 import File exposing(File)
-import Editor
 import Http
 
 
@@ -22,8 +21,6 @@ type Msg
     | PrevProblem
     | OK
     | ToggleInfo
-    | ToggleAppMode
-    | E Editor.EditorMsg
     | GotLesson (Result Http.Error String)
     | GetLesson
     | AcceptUrl String
