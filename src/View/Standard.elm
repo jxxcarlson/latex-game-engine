@@ -28,7 +28,7 @@ view model =
 lhs : Model -> Element Msg
 lhs model =
     column mainColumnStyle
-        [ column [  spacing 6 ]
+        [ column [  spacing 4 ]
             [
               mainTitle
             , problemTitle model.currentProblem
@@ -53,6 +53,8 @@ lhs model =
             , viewComment model.seed model.currentProblem
 
             , row [spacing 12] [loadButton, urlInput model]
+            , el [moveRight 72, Font.size 12, Font.italic, paddingEach {top = 8, left = 0, right = 0, bottom = 0}] 
+               (text "Use the load button for more lessons. Lessons are on Github: user/repo/tag/lesson-name")
             ]
         ]
 
@@ -103,7 +105,7 @@ rhs model =
                    , el [Font.size 14] (text (Maybe.map .date model.documentDescription |> Maybe.withDefault "Exercises"))
                  ]
                , renderedSource model.counter (Maybe.map .description model.documentDescription |>  Maybe.withDefault "Exercises")
-               , column [spacing 8, height (px 360), width (px 300), scrollbarY] (
+               , column [spacing 8, height (px 360), width (px 320), scrollbarY] (
                   List.map (summary  model.currentProblem) (model.problemList))
             ]
             , el [Font.size 12, Font.italic, paddingXY 0 24](outputDisplay model)
@@ -151,9 +153,8 @@ viewComment seed mprob =
         Just prob ->
             if String.length prob.comment < 3  then Element.none
             else
-                column[ paddingEach {top = 10, bottom = 8, left = 0, right = 0} ] [
-                       el [Font.size 14, Font.italic, moveRight 0, paddingXY 0 8] (text "Directions")
-                     , column [Background.color (Style.gray 255), Font.size 13, paddingXY 18 0, width (px (Config.paneWidth + 15)),  (height (px Config.commentPaneHeight)), scrollbarY]  
+                column[ paddingEach {top = 8, bottom = 32, left = 0, right = 0} ] [
+                      column [Background.color (Style.gray 255), Font.size 13, paddingXY 18 0, width (px (Config.paneWidth + 15)),  (height (px Config.commentPaneHeight)), scrollbarY]  
                       [renderMath seed (commentStyle (Config.paneWidth - 20) (Config.commentPaneHeight)) prob.comment]
                      ]
 
@@ -161,7 +162,11 @@ viewComment seed mprob =
 
 viewEditor : Model -> Element Msg
 viewEditor model =
-    Input.multiline [width (px 560), height (px Config.paneHeight), Font.size 16]
+    let 
+        bgColor = 
+            Background.color (Element.rgb 0.9 0.89 1.0)
+    in
+    Input.multiline [width (px 560), height (px Config.paneHeight), Font.size 16, bgColor]
       { onChange = GetSolution
       , text = model.solution
       , placeholder = Nothing
@@ -171,9 +176,17 @@ viewEditor model =
 
 viewSolution : Int -> String -> Element Msg
 viewSolution  seed solution =
-  column  problemStyle
+  column  solutionStyle
      [renderMath seed [] solution]
 
+solutionStyle : List (Attribute Msg)
+solutionStyle  = 
+    [height (px Config.paneHeight)
+      , width (px 560)
+      , paddingXY 18 0
+      , Font.size 16
+      , Background.color (rgb 255 255 255)]
+      
 viewProblem : Int -> Maybe AugmentedProblem -> Element Msg
 viewProblem seed mproblem =
     case mproblem of
@@ -191,7 +204,13 @@ renderProblem seed problem =
 
 
 problemStyle : List (Attribute Msg)
-problemStyle = [height (px Config.paneHeight), width (px 560), paddingXY 18 0,  Font.size 16, Background.color (rgb 255 255 255)]
+problemStyle  = 
+    [height (px Config.paneHeight)
+    , width (px 560)
+    , paddingXY 18 0
+    , Font.size 16
+    , Background.color (rgb 255 255 255)
+    ]
 
 renderMath : Int -> List (Html.Attribute Msg) -> String -> Element Msg
 renderMath seed attr str =
