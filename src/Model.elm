@@ -1,8 +1,8 @@
 module Model exposing (..)
 
-import Problem exposing(Id, Op(..), AugmentedProblem)
+import Problem exposing(Id,  AugmentedProblem)
 import DocParser exposing(Problem, DocumentDescription)
-import Tree.Zipper as Zipper exposing(Zipper)
+import Tree.Zipper exposing(Zipper)
 
 type alias Model =
     { input : String

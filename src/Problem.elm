@@ -1,7 +1,7 @@
 module Problem exposing (AugmentedProblem, setCompleted, Header,
-   numberOfCompletedProblems, numberOfProblems, deAugment,
+   numberOfCompletedProblems, numberOfProblems,
     rootProblem
-   , Id, Op(..), toZipper, firstChild, forward, backward)
+   , Id, toZipper, firstChild, forward, backward)
 
 import DocParser exposing(Problem)
 import HTree
@@ -25,8 +25,6 @@ type alias Header = {
     , description : String
   }
 
-
-
 augmentProblem : Problem -> AugmentedProblem
 augmentProblem p = {
        title = p.title
@@ -35,16 +33,6 @@ augmentProblem p = {
      , comment  = p.comment
      , completed = False
      }
-deAugment : AugmentedProblem -> Problem
-deAugment p = {
-       title = p.title
-     , id  = p.id
-     , target  = p.target
-     , comment  = p.comment
-     }
-
-
-
 
 rootProblem = {
       title = "root"
@@ -53,8 +41,6 @@ rootProblem = {
     , comment = ""
     , completed = False
     }
-
-type Op = Next | Prev
 
 level : AugmentedProblem -> Int
 level prob =

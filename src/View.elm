@@ -6,7 +6,7 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
 import Element.Input as Input
-import Problem exposing(Id, Op(..), AugmentedProblem)
+import Problem exposing(Id, AugmentedProblem)
 import DocParser exposing(Problem, DocumentDescription)
 import MiniLatex.EditSimple
 import Config

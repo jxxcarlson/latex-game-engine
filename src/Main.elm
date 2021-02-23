@@ -5,7 +5,7 @@ import Browser
 import Html exposing (Html)
 import Element exposing (..)
 import Element.Background as Background
-import Problem exposing(Id, Op(..), AugmentedProblem)
+import Problem exposing(Id, AugmentedProblem)
 import DocParser exposing(Problem, DocumentDescription)
 import Random
 import Style exposing(..)
