@@ -1,6 +1,6 @@
 module Problem exposing (AugmentedProblem, setCompleted, Header,
    numberOfCompletedProblems, numberOfProblems, deAugment,
-    findById, rootProblem
+    rootProblem
    , Id, Op(..), toZipper, firstChild, forward, backward)
 
 import DocParser exposing(Problem)
@@ -56,41 +56,11 @@ rootProblem = {
 
 type Op = Next | Prev
 
-findById : Id -> List Problem -> Maybe Problem
-findById id probs =
-    List.filter (\prob -> prob.id == id) probs |> List.head
-
 level : AugmentedProblem -> Int
 level prob =
     case prob.id of
         Nothing -> -1
         Just id_ -> List.length id_
-
-
-headerToString : Header -> String
-headerToString header =
-    [ fieldToString "title" header.docTitle
-   , fieldToString "author" header.author
-   , fieldToString "date" header.date
-   , fieldToString "description" header.description
-   ] |> String.join "\n"
-
-
-problemToString : Problem -> String
-problemToString problem =
-    [ fieldToString "title" problem.title
-   , idToString problem.id
-   , fieldToString "target" problem.target
-   , fieldToString "comment" problem.comment] |> String.join "\n"
-idToString :Maybe (List Int) -> String
-idToString mis =
-    case mis of
-        Nothing -> fieldToString "id" ""
-        Just is ->  fieldToString "id" (String.join "." (List.map String.fromInt is))
-
-fieldToString : String -> String -> String
-fieldToString name value =
-    name ++ ":" ++ String.trim value ++ "\n---"
 
 toZipper : List Problem -> Zipper AugmentedProblem
 toZipper problems =
