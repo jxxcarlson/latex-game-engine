@@ -19,8 +19,5 @@ type alias Model =
     , showInfo : Bool
     , numberOfProblems : Int
     , numberOfProblemsCompleted : Int
-    , appMode : AppMode
     , url : String
     }
-
-type AppMode = StandardMode | EditMode

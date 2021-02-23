@@ -5,8 +5,6 @@ import Browser
 import Html exposing (Html)
 import Element exposing (..)
 import Element.Background as Background
-import File exposing (File)
-import File.Select as Select
 import Problem exposing(Id, Op(..), AugmentedProblem)
 import Task
 import DocParser exposing(Problem, DocumentDescription)
@@ -17,7 +15,7 @@ import Utility
 import Tree.Zipper as Zipper exposing(Zipper)
 import Msg exposing(..)
 import View.Standard as Standard
-import Model exposing(Model, AppMode(..))
+import Model exposing(Model)
 import Http
 import Tree.Zipper as Zipper
 import Tree
@@ -60,7 +58,6 @@ init flags =
       , showInfo = False
       , numberOfProblems  = Problem.numberOfProblems data.zipper
       , numberOfProblemsCompleted = 0
-      , appMode = StandardMode
       , url = "jxxcarlson/latex-lessons/master/lesson1"
       }
     , Cmd.none
@@ -101,16 +98,6 @@ update msg model =
 
         ReverseText ->
             ( { model | message = model.message |> String.reverse |> String.toLower }, Cmd.none )
-
-        ProblemsRequested ->
-              ( model
-              , Select.file ["text/text"] ProblemsSelected
-              )
-
-        ProblemsSelected file ->
-          ( model
-          , Task.perform ProblemsLoaded (File.toString file)
-          )
 
         ProblemsLoaded content ->
           loadLesson model content
