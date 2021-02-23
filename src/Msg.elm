@@ -4,6 +4,7 @@ import MiniLatex.EditSimple
 import Markdown.Render
 import File exposing(File)
 import Editor
+import Http
 
 
 type Msg
@@ -23,3 +24,6 @@ type Msg
     | ToggleInfo
     | ToggleAppMode
     | E Editor.EditorMsg
+    | GotLesson (Result Http.Error String)
+    | GetLesson
+    | AcceptUrl String

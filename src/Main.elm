@@ -20,9 +20,11 @@ import View.Standard as Standard
 import View.Editor as Editor
 import Model exposing(Model, AppMode(..))
 import Editor exposing(EditorModel, EditorMsg(..))
+import Http
 import Tree.Zipper as Zipper
 import Tree
 import Problem
+import Strings
 
 main =
     Browser.element
@@ -38,24 +40,46 @@ type alias Flags =
     , height : Int
     }
 
-
+ --case load (Utility.removeComments content) of
+ --   Err message -> ({model | message = message}, Cmd.none)
+ --   Ok data ->
+ --       let
+ --         oldEditorModel = model.editorModel
+ --         newEditorModel =
+ --            {oldEditorModel | problemList = List.reverse data.problems}
+ --              |> addDocumentDescription (Just data.desc)
+ --       in
+ --         ( { model | fileContents = Just content
+ --              , documentDescription = Just data.desc
+ --              , problems = data.zipper
+ --              , currentProblem = Just <| Zipper.label data.zipper
+ --              , message =  fileStatus (Just content)
+ --              , solution =  ""
+ --              , counter = model.counter + 1
+ --              , numberOfProblems = Problem.numberOfProblems data.zipper
+ --              , numberOfProblemsCompleted = 0
+ --              , editorModel = newEditorModel
+ --           }
+ --         , Cmd.none
+ --         )
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
       data : { desc : DocumentDescription, problems : List Problem, zipper : Zipper AugmentedProblem }
-      data = case load Config.initialDocumentText of
+      data = case load Strings.initialDocument of
           Ok data_ -> data_
           Err _ -> {desc = DocParser.errorDescription, problems = [], zipper = Zipper.fromTree (Tree.singleton Problem.rootProblem)}
     in
     ( { input = "App started"
       , message = "App started"
-      , fileContents = Nothing
+      , fileContents = Just Strings.initialDocument
       , documentDescription = Just data.desc
       , documentDescriptionVisible = True
       , problems = data.zipper
+      , problemList = data.zipper |> Zipper.toTree |> Tree.flatten |> List.drop 1
       , currentProblem =  Just (Zipper.label data.zipper)
-      , solution = Config.initialSolutionText
+      , solution = ""
       , seed = flags.seed
       , counter = 0
       , showInfo = False
@@ -63,9 +87,13 @@ init flags =
       , numberOfProblemsCompleted = 0
       , appMode = StandardMode
       , editorModel = Editor.initModel
+      , url = "jxxcarlson/latex-lessons/master/lesson1"
       }
     , Cmd.none
     )
+
+
+
 
 
 subscriptions model =
@@ -81,6 +109,18 @@ update msg model =
         LaTeXMsg _ -> ( model, Cmd.none )
 
         MarkdownMsg _ -> ( model, Cmd.none )
+
+        AcceptUrl url ->
+          ({ model | url = url}, Cmd.none)
+
+        GetLesson ->
+          (model, getLesson model.url)
+
+        GotLesson result ->
+          case result of
+           Ok content -> loadLesson model content
+
+           Err _ -> (model, Cmd.none)
 
         InputText str ->
             ( { model | input = str, message = str }, Cmd.none )
@@ -99,35 +139,13 @@ update msg model =
           )
 
         ProblemsLoaded content ->
-            case load (Utility.removeComments content) of
-                Err message -> ({model | message = message}, Cmd.none)
-                Ok data ->
-                    let
-                      oldEditorModel = model.editorModel
-                      newEditorModel =
-                         {oldEditorModel | problemList = List.reverse data.problems}
-                           |> addDocumentDescription (Just data.desc)
-                    in
-                      ( { model | fileContents = Just content
-                           , documentDescription = Just data.desc
-                           , documentDescriptionVisible = True
-                           , problems = data.zipper
-                           , currentProblem = Just <| Zipper.label data.zipper
-                           , message =  fileStatus (Just content)
-                           , solution =  "nothing yet"
-                           , counter = model.counter + 1
-                           , numberOfProblems = Problem.numberOfProblems data.zipper
-                           , numberOfProblemsCompleted = 0
-                           , editorModel = newEditorModel
-                        }
-                      , Cmd.none
-                      )
+          loadLesson model content
 
         NewSeed newSeed ->
              ( { model | seed = newSeed }, Cmd.none )
 
         GetSolution s ->
-           ({model | solution = s, counter = Debug.log "N" (model.counter + 1)}, Random.generate NewSeed (Random.int 1 10000))
+           ({model | solution = s, counter = model.counter + 1}, Random.generate NewSeed (Random.int 1 10000))
 
 
         NextProblem ->
@@ -202,6 +220,50 @@ mainView model =
 
 
 -- HELPERS
+
+loadLesson model content =
+    case load (Utility.removeComments content) of
+        Err message -> ({model | message = message}, Cmd.none)
+        Ok data ->
+            let
+                oldEditorModel = model.editorModel
+                newEditorModel =
+                    {oldEditorModel | problemList = List.reverse data.problems}
+                    |> addDocumentDescription (Just data.desc)
+            in
+                ( { model | fileContents = Just content
+                    , documentDescription = Just data.desc
+                    , problems = data.zipper
+                    , currentProblem = Just <| Zipper.label data.zipper
+                    , problemList = data.zipper |> Zipper.toTree |> Tree.flatten |> List.drop 1
+                    , message =  fileStatus (Just content)
+                    , solution =  ""
+                    , counter = model.counter + 1
+                    , numberOfProblems = Problem.numberOfProblems data.zipper
+                    , numberOfProblemsCompleted = 0
+                    , editorModel = newEditorModel
+                }
+                , Cmd.none
+                )
+
+getLesson: String -> Cmd Msg
+getLesson url =
+  Http.get
+    { url = "https://raw.githubusercontent.com/" ++ url -- dev: https://raw.githack.com/, prod: rawcdn.githack.com
+    , expect = Http.expectString GotLesson
+    }
+
+getLesson1 : String -> Cmd Msg
+getLesson1 url =
+  Http.riskyRequest
+    { method = "GET"
+    , headers = [Http.header "Access-Control-Allow-Origin" "*"]
+    , url = url
+    , body = Http.emptyBody
+    , expect = Http.expectString GotLesson
+    , timeout = Nothing
+    , tracker = Nothing
+    }
 
 noFocus : Element.FocusStyle
 noFocus =

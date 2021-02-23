@@ -84,7 +84,7 @@ problems input =
 
 parseDocument : String -> Result String (DocumentDescription, List Problem)
 parseDocument input =
-    runWithErrorReporter documentParser input |> Debug.log "PARSE"
+    runWithErrorReporter documentParser input
 
 documentParser : Parser (DocumentDescription, List Problem)
 documentParser =

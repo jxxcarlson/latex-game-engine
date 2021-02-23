@@ -2,6 +2,7 @@ module Config exposing (..)
 
 paneHeight : Int
 paneHeight = 100
+commentPaneHeight = 80
 
 paneWidth = 540
 
@@ -11,11 +12,11 @@ appHeight = 750
 
 appTitle = "LaTeX Challenge"
 
-problemTitle = "Write LaTeX to imitate this:"
+problemTitle = "Imitate what you see below"
 
-solutionTitle = "Your source text, rendered:"
+solutionTitle = "This is what you wrote, rendered:"
 
-answerTitle = "Your source text:"
+answerTitle = "Write your LaTeX here:"
 
 initialDocumentText = """title: Welcome!
 ---
@@ -75,8 +76,7 @@ title: Definite integral
 ---
 id: 2
 ---
-target:
-$$
+target:$$
 \\int_0^1 x^n dx
 $$
 ---
@@ -88,8 +88,7 @@ superscripts, e.g, "a_1^2 + a_2^2" produces $a_1^2 + a_2^2$.
 
 """
 
-initialSolutionText = """
-$$
+initialSolutionText = """$$
 x^n dx
 $$
 """

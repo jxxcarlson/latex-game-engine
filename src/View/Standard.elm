@@ -30,27 +30,30 @@ lhs model =
     column mainColumnStyle
         [ column [  spacing 6 ]
             [
-              problemTitle model.currentProblem
+              mainTitle
+            , problemTitle model.currentProblem
             , heading1 Config.problemTitle
             , viewProblem model.counter model.currentProblem
             , heading Config.solutionTitle
             , viewSolution model.counter model.solution
             , heading Config.answerTitle
             , viewEditor model
-            , showComment model.seed model.currentProblem
-            , row [spacing 18, paddingXY 0 12] [
-               loadButton
-               , row [spacing 6] [
+            , row [spacing 18, paddingXY 0 12, width (px Config.paneWidth)] [
+                row [spacing 6] [
                      prevButton
-                   , okButton
+                   
                    , nextButton
                   ]
-               ,el [] (toggleInfo model.showInfo)
-               , showStatus model.currentProblem
-               , showScore model
+               , el [centerX] ( okButton)
+               --,el [] (toggleInfo model.showInfo)
+               -- , showStatus model.currentProblem
+               , el [alignRight] (showScore model)
 
                ]
+            , viewComment model.seed model.currentProblem
+
             , View.Common.showIf model.showInfo <| showHint model.seed model.currentProblem
+            , row [spacing 12] [loadButton, urlInput model]
             ]
         ]
 
@@ -73,7 +76,10 @@ showStatus mprob =
               el [Font.size 14] (text ("Complete: " ++ msg))
 
 
-
+mainTitle :  Element Msg
+mainTitle =
+        el [Font.size 24, paddingEach {top = 0, bottom = 8, left = 0, right = 0}] (text "LaTeX Tutor")
+            
 
 problemTitle : Maybe AugmentedProblem -> Element Msg
 problemTitle mprob =
@@ -86,31 +92,30 @@ problemTitle mprob =
                   |> List.map String.fromInt
                   |> String.join "."
             in
-             el [Font.bold, Font.size 18] (text <| id ++ " " ++ prob.title)
+             el [Font.bold, Font.size 18, paddingXY 0 8] (text <| id ++ " " ++ prob.title)
 
 rhs : Model -> Element Msg
 rhs model =
     column rhsColumnStyle
         [ column [  spacing 10 ]
-            [
-                el [Font.bold, Font.size 24] (text (Maybe.map .title model.documentDescription |> Maybe.withDefault "Exercises"))
-               , el [Font.bold, Font.size 14] (text (Maybe.map .author model.documentDescription |> Maybe.withDefault "Exercises"))
-               , el [Font.bold, Font.size 14] (text (Maybe.map .date model.documentDescription |> Maybe.withDefault "Exercises"))
-               , View.Common.showIf ( model.numberOfProblemsCompleted == 0 && model.documentDescriptionVisible)
-                  (renderedSource model.counter (Maybe.map .description model.documentDescription |>  Maybe.withDefault "Exercises"))
-               , View.Common.showIf ( model.numberOfProblemsCompleted /= 0 || not model.documentDescriptionVisible)
-                 (column [spacing 8, height (px 500), scrollbarY] (
-                 List.map (summary (Maybe.map Problem.deAugment model.currentProblem)) (List.reverse model.editorModel.problemList)))
+            [   column [spacing 4] [
+                    el [Font.bold, Font.size 24] (text (Maybe.map .title model.documentDescription |> Maybe.withDefault "Exercises"))
+                   , el [Font.size 14] (text (Maybe.map .author model.documentDescription |> Maybe.withDefault "Exercises"))
+                   , el [Font.size 14] (text (Maybe.map .date model.documentDescription |> Maybe.withDefault "Exercises"))
+                 ]
+               , renderedSource model.counter (Maybe.map .description model.documentDescription |>  Maybe.withDefault "Exercises")
+               , column [spacing 8, height (px 360), width (px 300), scrollbarY] (
+                  List.map (summary  model.currentProblem) (model.problemList))
             ]
-            , el [Font.size 12, Font.italic, paddingXY 0 12](outputDisplay model)
-            , row [alignBottom, spacing 18] [el [alignBottom] (View.Common.toggleAppMode model.appMode)
+            , el [Font.size 12, Font.italic, paddingXY 0 24](outputDisplay model)
+            -- , row [alignBottom, spacing 18] [el [alignBottom] (View.Common.toggleAppMode model.appMode) ]
 
-                  ]
+
         ]
 
 
 
-summary : Maybe Problem -> Problem -> Element Msg
+summary : Maybe AugmentedProblem -> AugmentedProblem -> Element Msg
 summary mproblem problem =
     let
       fontColor = if mproblem == Just problem then
@@ -120,8 +125,8 @@ summary mproblem problem =
 
     in
     row [spacing 12] [
-         el [Font.size 12, Font.color fontColor, Font.bold, width (px 20)] (
-           el [alignRight] (text <| (idToString problem.id)))
+         el [Font.size 12, Font.color fontColor, Font.bold, width (px 30)] (
+           el [alignLeft] (text <| (idToString problem.id)))
        , el [Font.size 14, Font.color fontColor] (text <| String.trim problem.title)
        ]
 
@@ -140,8 +145,6 @@ renderedSource counter sourceText =
         ) |> Element.html
 
 
-
-
 showHint : Int -> Maybe AugmentedProblem -> Element Msg
 showHint seed mprob =
     case mprob of
@@ -150,17 +153,17 @@ showHint seed mprob =
               column [Font.size 13, width (px 580), padding 10] [renderMath seed hintStyle prob.hint]
              ]
 
-showComment : Int -> Maybe AugmentedProblem -> Element Msg
-showComment seed mprob =
+viewComment : Int -> Maybe AugmentedProblem -> Element Msg
+viewComment seed mprob =
     case mprob of
         Nothing -> Element.none
         Just prob ->
             if String.length prob.comment < 3  then Element.none
             else
-                column[ ] [
-                       el [Font.size 14, Font.italic, moveRight 8] (text "Directions")
-                     , column [Font.size 13, padding 10]
-                      [renderMath seed (commentStyle Config.paneWidth Config.paneHeight) prob.comment]
+                column[ paddingEach {top = 10, bottom = 8, left = 0, right = 0} ] [
+                       el [Font.size 14, Font.italic, moveRight 0, paddingXY 0 8] (text "Directions")
+                     , column [Background.color (Style.gray 255), Font.size 13, paddingXY 18 0, width (px (Config.paneWidth + 15)),  (height (px Config.commentPaneHeight)), scrollbarY]  
+                      [renderMath seed (commentStyle (Config.paneWidth - 20) (Config.commentPaneHeight)) prob.comment]
                      ]
 
 
@@ -244,7 +247,16 @@ inputText model =
             , label = Input.labelLeft [] <| el [] (text "")
             })
 
--- BUTTONS
+-- BUTTONS & FIELDS
+
+urlInput : Model -> Element Msg 
+urlInput model = 
+   Input.text [width (px 482), Font.size 14]
+     { onChange = AcceptUrl
+     , text = model.url
+     , placeholder = Nothing
+     , label = Input.labelHidden "Enter Github URL"
+     }
 
 toggleInfo : Bool -> Element Msg
 toggleInfo showInfo =
@@ -263,7 +275,7 @@ loadButton : Element Msg
 loadButton =
     row [ ]
         [ Input.button buttonStyle
-            { onPress = Just ProblemsRequested
+            { onPress = Just GetLesson
             , label = el labelStyle (text "Load")
             }
         ]
@@ -272,7 +284,7 @@ okButton =
     row [ ]
         [ Input.button buttonStyle
             { onPress = Just OK
-            , label = el labelStyle(text "OK")
+            , label = el labelStyle(text "I think it is correct")
             }
         ]
 

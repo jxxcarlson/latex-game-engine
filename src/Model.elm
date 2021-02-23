@@ -13,6 +13,7 @@ type alias Model =
     , documentDescription : Maybe DocumentDescription
     , documentDescriptionVisible : Bool
     , problems : Zipper AugmentedProblem
+    , problemList : List AugmentedProblem
     , currentProblem : Maybe AugmentedProblem
     , solution: String
     , seed : Int
@@ -22,6 +23,7 @@ type alias Model =
     , numberOfProblemsCompleted : Int
     , appMode : AppMode
     , editorModel : EditorModel
+    , url : String
     }
 
 type AppMode = StandardMode | EditMode

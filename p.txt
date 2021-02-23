@@ -15,8 +15,8 @@ target: $\alpha + \beta + \gamma = \pi$
 ---
 hint:
 ---
-comment: Enclose your formula with dollar signs: \dollar ... \dollar.
-Use \bs{alpha} for $\alpha$, and so on.
+comment: Write source code for the formula above. Enclose it in dollar
+signs: \dollar MATH HERE \dollar. Use \bs{alpha} for $\alpha$, and so on.
 ---
 
 title:Integrals
@@ -27,11 +27,9 @@ target: $$\int x dx$$
 ---
 hint:
 ---
-comment: Here you will need \code{\bs{int}} for $\int$.  Snippets of
-LaTeX code like \code{\bs{int}}  are called \italic{macros}.
+comment: Now write code for the integral above. You will need \code{\bs{int}} for $\int$.  Snippets of LaTeX code like \code{\bs{int}}  are called \italic{macros}.
 
-This time, put your LaTeX code betwen double dollar signs:
-\dollar\dollar .. \dollar\dollar.  This is \italic{display math mode}.
+This time, put your LaTeX code betwen double dollar signs: \dollar\dollar MATH HERE \dollar\dollar.  This is \italic{display math mode}.
 ---
 
 title:Spacing
@@ -43,8 +41,7 @@ target: $$\int x\ dx$$
 hint:
 ---
 comment: Sometimes you need to adjust the spacing.  If you put \code{\bs{space}}
-between the \code{x} and the \code{dx}, the formula will look better.
-You can also put a backslash followed by a space.
+between the \code{x} and the \code{dx}, the formula will look better. You can also put a backslash followed by a space.
 ---
 
 title:Superscripts
@@ -55,9 +52,7 @@ target:Pythagoras said that $ a^2 + b^2 = c^2 $
 ---
 hint:
 ---
-comment:Use \code{^} for superscripts, e.g, \code{x^2} for $x^2$.
-Notice the form: ordinary text, with the mathematics
-between dollar signs. This is \italic{inline math mode} once again.
+comment:Use \code{^} for superscripts, e.g, \code{x^2} for $x^2$. Notice the form: ordinary text, with the mathematics between dollar signs. This is \italic{inline math mode} once again.
 ---
 
 title:Superscripts and Integrals
@@ -70,10 +65,8 @@ $$
 ---
 hint:
 ---
-comment:You know what to do here!  Combine what you know
-about symbols with what you know about superscripts.
-
-This is \italic{display math mode} once again.
+comment:You know what to do here!  Combine what you know about symbols
+with what you know about superscripts. This is \italic{display math mode} once again.
 ---
 
 
@@ -88,11 +81,64 @@ $$
 hint:
 ---
 comment: You will need to use the \code{\bs{frac}} macro.  It works
-like this: \code{\bs{frac}\texarg{numerator}\texarg{denomianator}}.
-
-If you don't like the looks of the result, try putting the macro
-\code{\bs{small}} just before the \code{\bs{frac}}.
+like this: \code{\bs{frac}\texarg{numerator}\texarg{denomianator}}. If
+you don't like the looks of the result, try putting the macro \code{\bs{small}} just before the \code{\bs{frac}}.
 ---
+
+title:Derivatives
+---
+id:2.3
+---
+target:$$
+\frac{dy}{dx} = y
+$$
+---
+hint:
+---
+comment: You can use fractions to make derivatives.
+---
+
+title: Second derivatives
+---
+id:2.3
+---
+target:$$
+\frac{d^2y}{d^2x} = -k y
+$$
+---
+hint:
+---
+comment: You can use fractions and superscripts to make second derivatives.
+---
+
+title: Partial derivatives
+---
+id:2.4
+---
+target:$$
+\frac{\partial u}{\partial t} = \frac{\partial u}{\partial x} 
+$$
+---
+hint:
+---
+comment: Here you need to know that \code{\bs{partial}} makes this: $\partial$.
+---
+
+
+title: The wave equation
+---
+id:2.4
+---
+target:$$
+\frac{\partia^2l u}{\partial t^2} = \frac{\partial^2 u}{\partial x^2} 
+$$
+---
+hint:
+---
+comment: You can do it!
+---
+
+
 
 title:Subscripts
 ---
@@ -104,10 +150,7 @@ $$
 ---
 hint:Use \code{_} for subscripts, e.g., \code{a_1} for $a_1$.
 ---
-comment:Use \code{_} for subscripts, e.g., \code{a_1} for $a_1$.
-\code{\ldots}  is a \italic{macro}.  It puts three dots along
-the baseline.There are lots of these!  Notice the double dollar signs.
-This is \italic{display math mode}.
+comment:Use \code{_} for subscripts, e.g., \code{a_1} for $a_1$. 
 ---
 
 title:On and on
@@ -120,8 +163,8 @@ $$
 ---
 hint:Use \code{_} for subscripts, e.g., \code{a_1} for $a_1$.
 ---
-comment:\code{\ldots}  is a \italic{macro}.  It puts three dots along
-the baseline.There are lots of these!
+comment:The macro \code{\ldots} puts three dots along the baseline. A
+related macro is \code{\bs{cdots}}, which puts dots centere in the line, above the baseline.
 ---
 
 title:Subscripts and superscripts
@@ -134,7 +177,7 @@ $$
 ---
 hint:The previous two problems gave you what you need to do this one.
 ---
-comment:
+comment:  Now you can combine subscripts and superscripts.
 ---
 
 title:Complex subscirpts
@@ -147,9 +190,33 @@ $$
 ---
 hint:The previous two problems gave you what you need to do this one.
 ---
-comment:When the subscript consists of more than a single character
-or entity, enclose it in curly braces, like this:
-\code{x_\texarg{abc}} for $x_{abc}$.
+comment:When the subscript consists of more than a single character or entity, enclose it in curly braces, like this: \code{x_\texarg{abc}} for $x_{abc}$.
+---
+
+title: Subscripts of subscirpts
+---
+id:4.2
+---
+target:$$
+a_{i_1} + a_{i_2} + a_{1_3} + \ldots
+$$
+---
+hint:The previous two problems gave you what you need to do this one.
+---
+comment: Curly braces will help!
+---
+
+title: Subscripts in superscripts
+---
+id:4.3
+---
+target:$$
+a^{n_1} + a^{n_2} + a^{n_3} + \ldots
+$$
+---
+hint:The previous two problems gave you what you need to do this one.
+---
+comment: Curly braces will help here also.
 ---
 
 title:Sums
@@ -163,9 +230,8 @@ $$
 hint:Use curly braces to group the parts of the subscript, like this
 \code{\texarg{i=0}}.
 ---
-comment:Sums follow the same pattern as integrals, except
-that you use \code{\bs{sum}} in place of \code{\bs{int}}. Oh ...
-remember what we said earlier about complex subscripts.
+comment:Sums follow the same pattern as integrals, except that you use
+\code{\bs{sum}} in place of \code{\bs{int}}. Oh ... remember what we said earlier about complex subscripts.
 ---
 
 title:An infinite sum
@@ -185,7 +251,7 @@ comment:Use \code{\bs{infty}} for $\infty$.
 
 title:Harmonic series
 ---
-id:5.1
+id:5.2
 ---
 target:$$
 \sum_{n=1}^\infty \small\frac{1}{n}
