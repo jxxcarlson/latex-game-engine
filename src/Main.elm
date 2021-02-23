@@ -74,9 +74,6 @@ subscriptions model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NoOp ->
-            ( model, Cmd.none )
-
         LaTeXMsg _ -> ( model, Cmd.none )
 
         MarkdownMsg _ -> ( model, Cmd.none )
@@ -95,12 +92,6 @@ update msg model =
 
         InputText str ->
             ( { model | input = str, message = str }, Cmd.none )
-
-        ReverseText ->
-            ( { model | message = model.message |> String.reverse |> String.toLower }, Cmd.none )
-
-        ProblemsLoaded content ->
-          loadLesson model content
 
         NewSeed newSeed ->
              ( { model | seed = newSeed }, Cmd.none )

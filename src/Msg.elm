@@ -7,10 +7,7 @@ import Http
 
 
 type Msg
-    = NoOp
-    | InputText String
-    | ReverseText
-    | ProblemsLoaded String
+    = InputText String
     | LaTeXMsg MiniLatex.EditSimple.LaTeXMsg
     | MarkdownMsg Markdown.Render.MarkdownMsg
     | NewSeed Int
