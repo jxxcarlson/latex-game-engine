@@ -153,7 +153,7 @@ update msg model =
                     ( { model | showSolution = True }, Cmd.none )
 
                 True ->
-                    handleSolutionIsOK model
+                    handleSolutionIsNotOK model
 
 
 handleSolutionIsOK model =
@@ -171,11 +171,35 @@ handleSolutionIsOK model =
             in
             ( { model
                 | problems = zipper2
+                , problemList = zipper2 |> Zipper.toTree |> Tree.flatten |> List.drop 1
                 , solution = ""
                 , showSolution = False
                 , counter = model.counter + 1
                 , currentProblem = Just (Zipper.label zipper2)
                 , numberOfProblemsCompleted = Problem.numberOfCompletedProblems zipper2
+              }
+            , Cmd.none
+            )
+
+
+handleSolutionIsNotOK model =
+    case model.currentProblem of
+        Nothing ->
+            ( model, Cmd.none )
+
+        Just prob ->
+            let
+                zipper =
+                    Problem.forward model.problems
+            in
+            ( { model
+                | problems = zipper
+
+                -- , problemList = zipper2 |> Zipper.toTree |> Tree.flatten |> List.drop 1
+                , solution = ""
+                , showSolution = False
+                , counter = model.counter + 1
+                , currentProblem = Just (Zipper.label zipper)
               }
             , Cmd.none
             )
@@ -267,7 +291,7 @@ load input =
             Just
                 { format = Document.format document
                 , desc = Document.header document
-                , problems = List.map Problem.augment problems
+                , problems = Problem.augmentList problems
                 , zipper = Problem.zip problems |> Problem.firstChild
                 }
 

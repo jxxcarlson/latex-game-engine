@@ -106,10 +106,17 @@ summary mproblem problem =
 
             else
                 Element.rgb 0 0 0
+
+        content =
+            if problem.completed then
+                String.trim (getProblem problem)
+
+            else
+                "---"
     in
     row [ spacing 12 ]
         [ el [ Font.size 12, Font.color fontColor, Font.bold, width (px 30) ] (el [ alignLeft ] (text problem.id))
-        , el [ Font.size 14, Font.color fontColor ] (text <| String.trim (getProblem problem))
+        , el [ Font.size 14, Font.color fontColor ] (text content)
         ]
 
 
@@ -148,7 +155,7 @@ viewComment showMe seed mprob =
             else
                 column [ paddingEach { top = 8, bottom = 32, left = 0, right = 0 } ]
                     [ column [ Background.color (Style.gray 255), Font.size 13, paddingXY 18 0, width (px (Config.paneWidth + 15)), height (px Config.commentPaneHeightNarrow), scrollbarY ]
-                        [ renderMath seed (commentStyle (Config.paneWidth - 20) Config.commentPaneHeightNarrow) prob ]
+                        [ el [ paddingXY 0 0, centerY, Font.size 14 ] (text prob) ]
                     ]
 
 
@@ -183,7 +190,7 @@ viewSolution seed solution_ =
 
 solutionStyle : List (Attribute Msg)
 solutionStyle =
-    [ height (px Config.paneHeightNarrow)
+    [ height (px Config.paneHeight)
     , width (px 560)
     , paddingXY 18 0
     , Font.size 16
@@ -213,7 +220,7 @@ renderProblem seed problem =
 
 problemStyle : List (Attribute Msg)
 problemStyle =
-    [ height (px Config.paneHeightNarrow)
+    [ height (px Config.paneHeight)
     , width (px 560)
     , paddingXY 18 0
     , Font.size 16
