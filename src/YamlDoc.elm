@@ -131,20 +131,6 @@ problems:
 """
 
 
-foo =
-    """
-format: latex-commented
-header:
-  title: Problem set 1
-  author: James Carlson
-  contact: jxxcarlson@gmail.com
-  date: February 23, 2021
-  description: > In this lesson, you will learn how to do simple math formuluas.
-    When finished, you'll be able to do this:
-    $$ \\frac{\\sqrt{2 + \\sqrt 3}}{\\sqrt{ 2 + \\sqrt 5}} $$
-"""
-
-
 solved =
     """
 ---

@@ -71,6 +71,15 @@ lhs model =
         ]
 
 
+wellDone : Model -> Element Msg
+wellDone model =
+    if model.numberOfProblemsCompleted == model.numberOfProblems then
+        el [ Font.size 24, Font.bold, Font.color (Element.rgb 0.7 0 0) ] (text "Well done!")
+
+    else
+        Element.none
+
+
 showScore : Model -> Element Msg
 showScore model =
     let
@@ -111,6 +120,7 @@ rhs model =
             , column [ spacing 8, height (px 360), width (px 320), scrollbarY ]
                 (List.map (summary model.currentProblem) model.problemList)
             ]
+        , wellDone model
         , row [ moveDown 5, alignBottom, Font.size 12, Font.italic ] [ el [ alignBottom ] (outputDisplay model) ]
         ]
 
@@ -124,10 +134,17 @@ summary mproblem problem =
 
             else
                 Element.rgb 0 0 0
+
+        title =
+            if problem.completed then
+                String.fromChar '✓' ++ " " ++ (getProblem problem).title
+
+            else
+                (getProblem problem).title
     in
     row [ spacing 12 ]
         [ el [ Font.size 12, Font.color fontColor, Font.bold, width (px 30) ] (el [ alignLeft ] (text problem.id))
-        , el [ Font.size 14, Font.color fontColor ] (text <| String.trim (getProblem problem).title)
+        , el [ Font.size 14, Font.color fontColor ] (text title)
         ]
 
 

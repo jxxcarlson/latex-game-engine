@@ -93,8 +93,18 @@ rhs model =
             , column [ spacing 8, height (px 360), width (px 320), scrollbarY ]
                 (List.map (summary model.currentProblem) model.problemList)
             ]
+        , wellDone model
         , row [ moveDown 5, alignBottom, Font.size 12, Font.italic ] [ el [ alignBottom ] (outputDisplay model) ]
         ]
+
+
+wellDone : Model -> Element Msg
+wellDone model =
+    if model.numberOfProblemsCompleted == model.numberOfProblems then
+        el [ Font.size 24, Font.bold, Font.color (Element.rgb 0.7 0 0) ] (text "Well done!")
+
+    else
+        Element.none
 
 
 summary : Maybe AugmentedProblem -> AugmentedProblem -> Element Msg

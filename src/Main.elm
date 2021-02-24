@@ -240,6 +240,7 @@ loadLesson model content =
         Just data ->
             ( { model
                 | fileContents = Just content
+                , format = data.format
                 , documentHeader = data.desc
                 , problems = data.zipper
                 , currentProblem = Just <| Zipper.label data.zipper
@@ -283,8 +284,11 @@ fileStatus mstr =
 load : String -> Maybe Data
 load input =
     case YamlDoc.parseDocument input of
-        Just document ->
+        Just document_ ->
             let
+                document =
+                    Document.fixLaTeX document_
+
                 problems =
                     Document.problems document
             in
