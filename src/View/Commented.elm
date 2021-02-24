@@ -116,7 +116,7 @@ rhs model =
                 , el [ Font.size 14 ] (text model.documentHeader.author)
                 , el [ Font.size 14 ] (text model.documentHeader.date)
                 ]
-            , renderedSource model.counter model.documentHeader.description
+            , renderedSource model.counter (Document.fixLaTeXInString model.documentHeader.description)
             , column [ spacing 8, height (px 360), width (px 320), scrollbarY ]
                 (List.map (summary model.currentProblem) model.problemList)
             ]
