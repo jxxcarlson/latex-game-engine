@@ -84,12 +84,21 @@ showScore : Model -> Element Msg
 showScore model =
     let
         completed =
-            String.fromInt model.numberOfProblemsCompleted
+            model.numberOfProblemsCompleted
 
         all =
-            String.fromInt model.numberOfProblems
+            model.numberOfProblems
+
+        ratio =
+            String.fromInt completed ++ "/" ++ String.fromInt all
+
+        pc_ =
+            toFloat completed / toFloat all |> round |> String.fromInt
+
+        pc =
+            " (" ++ pc_ ++ "%)"
     in
-    el [ Font.size 18, Font.bold ] (text <| completed ++ "/" ++ all)
+    el [ Font.underline, Font.size 14, Font.color (Element.rgb 0.2 0.2 1) ] (text <| "Score: " ++ ratio ++ pc)
 
 
 mainTitle : Element Msg
