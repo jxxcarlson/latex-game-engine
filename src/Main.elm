@@ -1,23 +1,24 @@
 module Main exposing (main)
 
-
 import Browser
-import Html exposing (Html)
+import Document
 import Element exposing (..)
 import Element.Background as Background
-import Problem exposing(Id, AugmentedProblem)
-import DocParser exposing(Problem, DocumentDescription)
-import Random
-import Style exposing(..)
-import Tree.Zipper as Zipper exposing(Zipper)
-import Msg exposing(..)
-import View
-import Model exposing(Model)
+import Html exposing (Html)
 import Http
-import Tree.Zipper as Zipper
-import Tree
-import Problem
+import Model exposing (Model)
+import Msg exposing (..)
+import Problem exposing (AugmentedProblem, Id)
+import Random
 import Strings
+import Style exposing (..)
+import Tree
+import Tree.Zipper as Zipper exposing (Zipper)
+import View.Commented
+import View.Simple
+import View.Solved
+import YamlDoc
+
 
 main =
     Browser.element
@@ -27,37 +28,52 @@ main =
         , subscriptions = subscriptions
         }
 
+
 type alias Flags =
     { seed : Int
     , width : Int
     , height : Int
     }
 
+
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
-      data : { desc : DocumentDescription, problems : List Problem, zipper : Zipper AugmentedProblem }
-      data = case load Strings.initialDocument of
-          Ok data_ -> data_
-          Err _ -> {desc = DocParser.errorDescription, problems = [], zipper = Zipper.fromTree (Tree.singleton Problem.rootProblem)}
+        data : Data
+        data =
+            case load YamlDoc.commented of
+                Just data_ ->
+                    data_
+
+                Nothing ->
+                    { format = "latex-commented", desc = Document.errorHeader, problems = [], zipper = Problem.errorZipper }
     in
     ( { input = "App started"
+      , format = data.format
       , message = "App started"
-      , fileContents = Just Strings.initialDocument
-      , documentDescription = Just data.desc
-      , documentDescriptionVisible = True
+      , fileContents = Just YamlDoc.commented
+      , documentHeader = data.desc
+      , documentHeaderVisible = True
       , problems = data.zipper
-      , problemList = data.zipper |> Zipper.toTree |> Tree.flatten |> List.drop 1
-      , currentProblem =  Just (Zipper.label data.zipper)
+      , problemList = data.problems
+      , currentProblem = Just (Zipper.label data.zipper)
       , solution = ""
       , seed = flags.seed
       , counter = 0
-      , numberOfProblems  = Problem.numberOfProblems data.zipper
+      , numberOfProblems = List.length data.problems
       , numberOfProblemsCompleted = 0
       , url = "jxxcarlson/latex-lessons/master/lesson1"
       }
     , Cmd.none
     )
+
+
+type alias Data =
+    { format : String
+    , desc : Document.Header
+    , problems : List AugmentedProblem
+    , zipper : Zipper AugmentedProblem
+    }
 
 
 subscriptions model =
@@ -67,113 +83,143 @@ subscriptions model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        LaTeXMsg _ -> ( model, Cmd.none )
+        LaTeXMsg _ ->
+            ( model, Cmd.none )
 
-        MarkdownMsg _ -> ( model, Cmd.none )
+        MarkdownMsg _ ->
+            ( model, Cmd.none )
 
         AcceptUrl url ->
-          ({ model | url = url}, Cmd.none)
+            ( { model | url = url }, Cmd.none )
 
         GetLesson ->
-          (model, getLesson model.url)
+            ( model, getLesson model.url )
 
         GotLesson result ->
-          case result of
-           Ok content -> loadLesson model content
+            case result of
+                Ok content ->
+                    loadLesson model content
 
-           Err _ -> (model, Cmd.none)
+                Err _ ->
+                    ( model, Cmd.none )
 
         InputText str ->
             ( { model | input = str, message = str }, Cmd.none )
 
         NewSeed newSeed ->
-             ( { model | seed = newSeed }, Cmd.none )
+            ( { model | seed = newSeed }, Cmd.none )
 
         GetSolution s ->
-           ({model | solution = s, counter = model.counter + 1}, Random.generate NewSeed (Random.int 1 10000))
-
+            ( { model | solution = s, counter = model.counter + 1 }, Random.generate NewSeed (Random.int 1 10000) )
 
         NextProblem ->
             let
-                zipper = Problem.forward model.problems
+                zipper =
+                    Problem.forward model.problems
             in
-            ({model | problems = zipper
-                    , solution = ""
-                    , counter = model.counter + 1
-                    , documentDescriptionVisible = False
-                    , currentProblem = Just <| Zipper.label zipper}
-                    , Cmd.none)
+            ( { model
+                | problems = zipper
+                , solution = ""
+                , counter = model.counter + 1
+                , documentHeaderVisible = False
+                , currentProblem = Just <| Zipper.label zipper
+              }
+            , Cmd.none
+            )
 
         PrevProblem ->
             let
-                zipper = Problem.backward model.problems
+                zipper =
+                    Problem.backward model.problems
             in
-            ({model | problems = zipper
-                    , solution = ""
-                    , counter = model.counter + 1
-                    , currentProblem = Just <| Zipper.label zipper}, Cmd.none)
+            ( { model
+                | problems = zipper
+                , solution = ""
+                , counter = model.counter + 1
+                , currentProblem = Just <| Zipper.label zipper
+              }
+            , Cmd.none
+            )
 
         SolutionIsOK ->
             case model.currentProblem of
-                Nothing -> (model , Cmd.none)
+                Nothing ->
+                    ( model, Cmd.none )
+
                 Just prob ->
                     let
-                        zipper1 = Problem.setCompleted True prob model.problems
-                        zipper2 = Problem.forward zipper1
-                    in
-                        ({model | problems = zipper2
-                                , solution = ""
-                                , counter = model.counter + 1
-                                , currentProblem =  Just (Zipper.label zipper2)
-                                , numberOfProblemsCompleted = Problem.numberOfCompletedProblems zipper2
-                             }
-                            , Cmd.none)
+                        zipper1 =
+                            Problem.setCompleted True prob model.problems
 
+                        zipper2 =
+                            Problem.forward zipper1
+                    in
+                    ( { model
+                        | problems = zipper2
+                        , solution = ""
+                        , counter = model.counter + 1
+                        , currentProblem = Just (Zipper.label zipper2)
+                        , numberOfProblemsCompleted = Problem.numberOfCompletedProblems zipper2
+                      }
+                    , Cmd.none
+                    )
 
 
 view : Model -> Html Msg
 view model =
-    Element.layoutWith { options = [focusStyle noFocus]}
-       [Background.color (gray 60)]
-       (mainView model)
+    Element.layoutWith { options = [ focusStyle noFocus ] }
+        [ Background.color (gray 60) ]
+        (mainView model)
+
 
 mainView model =
-    View.view model
+    case model.format of
+        "latex-commented" ->
+            View.Commented.view model
+
+        "latex-simple" ->
+            View.Simple.view model
+
+        "latex-solved" ->
+            View.Solved.view model
+
+        _ ->
+            View.Simple.view model
+
 
 
 -- HELPERS
 
+
+loadLesson : Model -> String -> ( Model, Cmd msg )
 loadLesson model content =
-    case load (removeComments content) of
-        Err message -> ({model | message = message}, Cmd.none)
-        Ok data ->
-                ( { model | fileContents = Just content
-                    , documentDescription = Just data.desc
-                    , problems = data.zipper
-                    , currentProblem = Just <| Zipper.label data.zipper
-                    , problemList = data.zipper |> Zipper.toTree |> Tree.flatten |> List.drop 1
-                    , message =  fileStatus (Just content)
-                    , solution =  ""
-                    , counter = model.counter + 1
-                    , numberOfProblems = Problem.numberOfProblems data.zipper
-                    , numberOfProblemsCompleted = 0
-                }
-                , Cmd.none
-                )
+    case load content of
+        Nothing ->
+            ( { model | message = "Could not load document" }, Cmd.none )
 
-removeComments : String -> String
-removeComments str =
-   str
-     |> String.lines
-     |> List.filter (\l -> String.left 1 l /= "#")
-     |> String.join "\n"
+        Just data ->
+            ( { model
+                | fileContents = Just content
+                , documentHeader = data.desc
+                , problems = data.zipper
+                , currentProblem = Just <| Zipper.label data.zipper
+                , problemList = data.zipper |> Zipper.toTree |> Tree.flatten |> List.drop 1
+                , message = fileStatus (Just content)
+                , solution = ""
+                , counter = model.counter + 1
+                , numberOfProblems = Problem.numberOfProblems data.zipper
+                , numberOfProblemsCompleted = 0
+              }
+            , Cmd.none
+            )
 
-getLesson: String -> Cmd Msg
+
+getLesson : String -> Cmd Msg
 getLesson url =
-  Http.get
-    { url = "https://raw.githubusercontent.com/" ++ url -- dev: https://raw.githack.com/, prod: rawcdn.githack.com
-    , expect = Http.expectString GotLesson
-    }
+    Http.get
+        { url = "https://raw.githubusercontent.com/" ++ url -- dev: https://raw.githack.com/, prod: rawcdn.githack.com
+        , expect = Http.expectString GotLesson
+        }
 
 
 noFocus : Element.FocusStyle
@@ -187,14 +233,27 @@ noFocus =
 fileStatus : Maybe String -> String
 fileStatus mstr =
     case mstr of
-        Nothing -> "No file contents loaded"
-        Just stuff -> String.fromInt (String.length stuff) ++ " bytes read"
+        Nothing ->
+            "No file contents loaded"
+
+        Just stuff ->
+            String.fromInt (String.length stuff) ++ " bytes read"
 
 
-load : String -> Result String { desc: DocumentDescription, problems: List Problem, zipper: Zipper AugmentedProblem}
+load : String -> Maybe Data
 load input =
-    case DocParser.parseDocument input of
-        Ok (documentDescription, problems_) ->
-            Ok { desc = documentDescription, problems = problems_, zipper = Problem.toZipper problems_}
-        Err err -> Err ("Errors: " ++ err)
+    case YamlDoc.parseDocument input of
+        Just document ->
+            let
+                problems =
+                    Document.problems document
+            in
+            Just
+                { format = Document.format document
+                , desc = Document.header document
+                , problems = List.map Problem.augment problems
+                , zipper = Problem.zip problems |> Problem.firstChild
+                }
 
+        Nothing ->
+            Nothing

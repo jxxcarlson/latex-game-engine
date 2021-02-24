@@ -1,62 +1,76 @@
-module Problem exposing (AugmentedProblem, setCompleted, Header,
-   numberOfCompletedProblems, numberOfProblems,
-    rootProblem
-   , Id, toZipper, firstChild, forward, backward)
+module Problem exposing (zip, AugmentedProblem, setCompleted,
+   numberOfCompletedProblems, numberOfProblems, errorZipper, augment
+   , Id, firstChild, forward, backward)
 
-import DocParser exposing(Problem)
 import HTree
 import Tree exposing(Tree)
 import Tree.Zipper as Zipper exposing(Zipper)
+import Document
 
 type alias Id = Maybe (List Int)
 
-type alias AugmentedProblem = {
-      title : String
-    , id : Maybe (List Int)
-    , target : String
-    , comment : String
-    , completed : Bool
-    }
+type alias AugmentedProblem = {id: String, prob : Document.Problem, completed: Bool}
 
-type alias Header = {
-      docTitle : String
-    , author : String
-    , date : String
-    , description : String
-  }
+zip : List Document.Problem -> Zipper AugmentedProblem
+zip probs =
+    case List.head probs of
+        (Just (Document.CommentedP _)) ->
+            probs
+              |> List.map augment
+              |> HTree.fromList (augment rootProblemCommented) (\p -> indexLevel p.id)
+              |> Zipper.fromTree
+        _ ->
+            List.indexedMap (\k p -> {p | id = String.fromInt k}) (List.map augment probs)
+              |> HTree.fromList rootProblemSimple (\q -> 1) |> Zipper.fromTree
 
-augmentProblem : Problem -> AugmentedProblem
-augmentProblem p = {
-       title = p.title
-     , id  = p.id
-     , target  = p.target
-     , comment  = p.comment
-     , completed = False
-     }
+errorZipper : Zipper AugmentedProblem
+errorZipper = Tree.singleton (augmentProblemCommented rootProblemCommented_) |> Zipper.fromTree
 
-rootProblem = {
+
+augment : Document.Problem -> AugmentedProblem
+augment prob =
+    case prob of
+        (Document.SimpleP _) -> {id = "0", prob = prob, completed = False }
+        (Document.SolvedP _) -> {id = "0", prob = prob, completed = False }
+        (Document.CommentedP p) -> {id = p.id, prob = prob, completed = False }
+
+level : Document.Problem -> Int
+level prob =
+    case prob of
+        (Document.SimpleP _) -> 0
+        (Document.SolvedP _) -> 0
+        (Document.CommentedP p) -> p.id |> String.split "." |> List.length
+
+indexLevel str =
+    str |> String.split "." |> List.length
+
+
+
+augmentProblemCommented : Document.CommentedProblem -> AugmentedProblem
+augmentProblemCommented p = {id = p.id, prob = Document.CommentedP p, completed = False }
+
+
+rootProblemSimple : AugmentedProblem
+rootProblemSimple = {id = "x", prob = Document.SimpleP "root", completed = False}
+
+rootProblemSolved : AugmentedProblem
+rootProblemSolved = {id = "x", prob = Document.SolvedP {problem = "root",solution = ""}, completed = False}
+
+
+rootProblemCommented : Document.Problem
+rootProblemCommented = Document.CommentedP {
       title = "root"
-    , id = Just []
+    , id = ""
     , target = ""
     , comment = ""
-    , completed = False
     }
 
-level : AugmentedProblem -> Int
-level prob =
-    case prob.id of
-        Nothing -> -1
-        Just id_ -> List.length id_
-
-toZipper : List Problem -> Zipper AugmentedProblem
-toZipper problems =
-    problems
-      |> List.filter (\p -> p.id /= Nothing)
-      |> List.map augmentProblem
-      |> HTree.fromList rootProblem level
-      |> Zipper.fromTree
-      |> firstChild
-
+rootProblemCommented_ = {
+      title = "root"
+    , id = ""
+    , target = ""
+    , comment = ""
+    }
 
 firstChild : Zipper a -> Zipper a
 firstChild z =
