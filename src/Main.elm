@@ -63,7 +63,7 @@ init flags =
       , counter = 0
       , numberOfProblems = List.length data.problems
       , numberOfProblemsCompleted = 0
-      , url = "jxxcarlson/latex-lessons/master/latex-simple"
+      , url = "jxxcarlson/latex-lessons/master/latex-simple.yaml"
       }
     , Cmd.none
     )
