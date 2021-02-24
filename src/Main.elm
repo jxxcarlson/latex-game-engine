@@ -41,7 +41,7 @@ init flags =
     let
         data : Data
         data =
-            case load YamlDoc.commented of
+            case load YamlDoc.simple of
                 Just data_ ->
                     data_
 
@@ -58,6 +58,7 @@ init flags =
       , problemList = data.problems
       , currentProblem = Just (Zipper.label data.zipper)
       , solution = ""
+      , showSolution = False
       , seed = flags.seed
       , counter = 0
       , numberOfProblems = List.length data.problems
@@ -120,6 +121,7 @@ update msg model =
             ( { model
                 | problems = zipper
                 , solution = ""
+                , showSolution = False
                 , counter = model.counter + 1
                 , documentHeaderVisible = False
                 , currentProblem = Just <| Zipper.label zipper
@@ -135,6 +137,7 @@ update msg model =
             ( { model
                 | problems = zipper
                 , solution = ""
+                , showSolution = False
                 , counter = model.counter + 1
                 , currentProblem = Just <| Zipper.label zipper
               }
@@ -142,27 +145,40 @@ update msg model =
             )
 
         SolutionIsOK ->
-            case model.currentProblem of
-                Nothing ->
-                    ( model, Cmd.none )
+            handleSolutionIsOK model
 
-                Just prob ->
-                    let
-                        zipper1 =
-                            Problem.setCompleted True prob model.problems
+        ShowMe ->
+            case model.showSolution of
+                False ->
+                    ( { model | showSolution = True }, Cmd.none )
 
-                        zipper2 =
-                            Problem.forward zipper1
-                    in
-                    ( { model
-                        | problems = zipper2
-                        , solution = ""
-                        , counter = model.counter + 1
-                        , currentProblem = Just (Zipper.label zipper2)
-                        , numberOfProblemsCompleted = Problem.numberOfCompletedProblems zipper2
-                      }
-                    , Cmd.none
-                    )
+                True ->
+                    handleSolutionIsOK model
+
+
+handleSolutionIsOK model =
+    case model.currentProblem of
+        Nothing ->
+            ( model, Cmd.none )
+
+        Just prob ->
+            let
+                zipper1 =
+                    Problem.setCompleted True prob model.problems
+
+                zipper2 =
+                    Problem.forward zipper1
+            in
+            ( { model
+                | problems = zipper2
+                , solution = ""
+                , showSolution = False
+                , counter = model.counter + 1
+                , currentProblem = Just (Zipper.label zipper2)
+                , numberOfProblemsCompleted = Problem.numberOfCompletedProblems zipper2
+              }
+            , Cmd.none
+            )
 
 
 view : Model -> Html Msg

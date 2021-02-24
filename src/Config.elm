@@ -1,15 +1,39 @@
 module Config exposing (..)
 
+
 paneHeight : Int
-paneHeight = 100
-commentPaneHeight = 80
+paneHeight =
+    100
 
-paneWidth = 540
 
-appHeight = 750
+paneHeightNarrow : Int
+paneHeightNarrow =
+    50
 
-problemTitle = "Imitate what you see below"
 
-solutionTitle = "This is what you wrote, rendered:"
+commentPaneHeight =
+    80
 
-answerTitle = "Write your LaTeX here:"
+
+commentPaneHeightNarrow =
+    50
+
+
+paneWidth =
+    540
+
+
+appHeight =
+    750
+
+
+problemTitle =
+    "Imitate what you see below"
+
+
+solutionTitle =
+    "This is what you wrote, rendered:"
+
+
+answerTitle =
+    "Write your LaTeX here:"

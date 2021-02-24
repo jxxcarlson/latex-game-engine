@@ -1,9 +1,9 @@
 module Msg exposing (..)
 
-import MiniLatex.EditSimple
-import Markdown.Render
-import File exposing(File)
+import File exposing (File)
 import Http
+import Markdown.Render
+import MiniLatex.EditSimple
 
 
 type Msg
@@ -18,4 +18,4 @@ type Msg
     | NextProblem
     | PrevProblem
     | SolutionIsOK
-
+    | ShowMe

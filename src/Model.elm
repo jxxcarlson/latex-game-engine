@@ -16,6 +16,7 @@ type alias Model =
     , problemList : List AugmentedProblem
     , currentProblem : Maybe AugmentedProblem
     , solution : String
+    , showSolution : Bool
     , seed : Int
     , counter : Int
     , numberOfProblems : Int
