@@ -36,18 +36,6 @@ fixLaTeXInCommentedProblem p =
     { p | target = fixLaTeXInString p.target, comment = fixLaTeXInString p.comment }
 
 
-
---case prob of
---     SimpleP str ->
---         SimpleP (fixLaTeXInString str)
---
---     SolvedP p ->
---         SolvedP { p | problem = fixLaTeXInString p.problem, solution = fixLaTeXInString p.solution }
---
---     CommentedP p ->
---         CommentedP { p | target = fixLaTeXInString p.target, comment = fixLaTeXInString p.comment }
-
-
 fixLaTeXInString : String -> String
 fixLaTeXInString str =
     String.replace "\\\\" "\\" str

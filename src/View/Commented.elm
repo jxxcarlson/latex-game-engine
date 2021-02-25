@@ -15,6 +15,7 @@ import Model exposing (Model)
 import Msg exposing (..)
 import Problem exposing (AugmentedProblem, Id)
 import Style exposing (..)
+import View.Common
 
 
 view : Model -> Element Msg
@@ -55,50 +56,11 @@ lhs model =
             , viewSolution model.counter model.solution
             , heading Config.answerTitle
             , viewEditor model
-            , row [ spacing 18, paddingXY 0 12, width (px Config.paneWidth) ]
-                [ row [ spacing 6 ]
-                    [ prevButton
-                    , nextButton
-                    ]
-                , el [ centerX ] okButton
-                , el [ alignRight ] (showScore model)
-                ]
+            , View.Common.controls model
             , viewComment model.seed model.currentProblem
-            , row [ spacing 12 ] [ loadButton, urlInput model ]
-            , el [ moveRight 72, Font.size 12, Font.italic, paddingEach { top = 8, left = 0, right = 0, bottom = 0 } ]
-                (text "Use the load button for more lessons. Lessons are on Github: user/repo/tag/lesson-name")
+            , View.Common.loader model
             ]
         ]
-
-
-wellDone : Model -> Element Msg
-wellDone model =
-    if model.numberOfProblemsCompleted == model.numberOfProblems then
-        el [ Font.size 24, Font.bold, Font.color (Element.rgb 0.7 0 0) ] (text "Well done!")
-
-    else
-        Element.none
-
-
-showScore : Model -> Element Msg
-showScore model =
-    let
-        completed =
-            model.numberOfProblemsCompleted
-
-        all =
-            model.numberOfProblems
-
-        ratio =
-            String.fromInt completed ++ "/" ++ String.fromInt all
-
-        pc_ =
-            toFloat completed / toFloat all |> round |> String.fromInt
-
-        pc =
-            " (" ++ pc_ ++ "%)"
-    in
-    el [ Font.underline, Font.size 14, Font.color (Element.rgb 0.2 0.2 1) ] (text <| "Score: " ++ ratio ++ pc)
 
 
 mainTitle : Element Msg
@@ -129,8 +91,8 @@ rhs model =
             , column [ spacing 8, height (px 360), width (px 320), scrollbarY ]
                 (List.map (summary model.currentProblem) model.problemList)
             ]
-        , wellDone model
-        , row [ moveDown 5, alignBottom, Font.size 12, Font.italic ] [ el [ alignBottom ] (outputDisplay model) ]
+        , View.Common.wellDone model
+        , View.Common.bottomRowRHS model
         ]
 
 
@@ -285,61 +247,5 @@ heading1 str =
     row [ Font.size 16, Font.italic ] [ text str ]
 
 
-outputDisplay : Model -> Element msg
-outputDisplay model =
-    row [ spacing 12 ]
-        [ text model.message ]
-
-
 
 -- BUTTONS & FIELDS
-
-
-urlInput : Model -> Element Msg
-urlInput model =
-    Input.text [ width (px 482), Font.size 14 ]
-        { onChange = AcceptUrl
-        , text = model.url
-        , placeholder = Nothing
-        , label = Input.labelHidden "Enter Github URL"
-        }
-
-
-loadButton : Element Msg
-loadButton =
-    row []
-        [ Input.button buttonStyle
-            { onPress = Just GetLesson
-            , label = el labelStyle (text "Load")
-            }
-        ]
-
-
-okButton : Element Msg
-okButton =
-    row []
-        [ Input.button buttonStyle
-            { onPress = Just SolutionIsOK
-            , label = el labelStyle (text "I think it is correct")
-            }
-        ]
-
-
-prevButton : Element Msg
-prevButton =
-    row []
-        [ Input.button buttonStyle
-            { onPress = Just PrevProblem
-            , label = el labelStyle (text <| String.fromChar '◀')
-            }
-        ]
-
-
-nextButton : Element Msg
-nextButton =
-    row []
-        [ Input.button buttonStyle
-            { onPress = Just NextProblem
-            , label = el labelStyle (text <| String.fromChar '▶')
-            }
-        ]

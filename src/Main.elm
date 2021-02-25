@@ -41,7 +41,7 @@ init flags =
     let
         data : Data
         data =
-            case load YamlDoc.simple of
+            case load YamlDoc.solved of
                 Just data_ ->
                     data_
 
@@ -51,7 +51,7 @@ init flags =
     ( { input = "App started"
       , format = data.format
       , message = "App started"
-      , fileContents = Just YamlDoc.commented
+      , fileContents = Just YamlDoc.solved
       , documentHeader = data.desc
       , documentHeaderVisible = True
       , problems = data.zipper
@@ -153,7 +153,7 @@ update msg model =
                     ( { model | showSolution = True }, Cmd.none )
 
                 True ->
-                    handleSolutionIsNotOK model
+                    handleShowMe model
 
 
 handleSolutionIsOK model =
@@ -182,22 +182,30 @@ handleSolutionIsOK model =
             )
 
 
-handleSolutionIsNotOK model =
+handleShowMe model =
     case model.currentProblem of
         Nothing ->
             ( model, Cmd.none )
 
         Just prob ->
             let
+                showSolution =
+                    if model.format == "latex-solved" then
+                        not model.showSolution
+
+                    else
+                        False
+
                 zipper =
-                    Problem.forward model.problems
+                    if model.format == "latex-solved" then
+                        model.problems
+
+                    else
+                        Problem.forward model.problems
             in
             ( { model
                 | problems = zipper
-
-                -- , problemList = zipper2 |> Zipper.toTree |> Tree.flatten |> List.drop 1
-                , solution = ""
-                , showSolution = False
+                , showSolution = showSolution
                 , counter = model.counter + 1
                 , currentProblem = Just (Zipper.label zipper)
               }
