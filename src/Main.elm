@@ -41,7 +41,7 @@ init flags =
     let
         data : Data
         data =
-            case load YamlDoc.solved of
+            case load Strings.initialDocument of
                 Just data_ ->
                     data_
 
@@ -51,7 +51,7 @@ init flags =
     ( { input = "App started"
       , format = data.format
       , message = "App started"
-      , fileContents = Just YamlDoc.solved
+      , fileContents = Just Strings.initialDocument
       , documentHeader = data.desc
       , documentHeaderVisible = True
       , problems = data.zipper

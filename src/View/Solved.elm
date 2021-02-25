@@ -206,7 +206,7 @@ viewProblem seed mproblem =
             el [] (text "No problem loaded")
 
         Just problem ->
-            renderProblem seed (Debug.log "PROB" (getProblem problem).problem)
+            renderProblem seed (getProblem problem).problem
 
 
 
